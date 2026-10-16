@@ -1,0 +1,11 @@
+{
+  "name": "protocore-fit-checker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "戀與深空 芯核適配度檢查器",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build": "node scripts/build.js"
+  }
+}
