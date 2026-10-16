@@ -69,3 +69,30 @@ export function analyzeGrowth(core, type, rules) {
     premiumSeed,
   };
 }
+
+// 詞條衝突：兩邊的詞條不會同時對任何搭檔有用（例如生命和防禦），只提示、不改分數
+// type＝分數最高那個搭檔的型別，用來算「之後每次強化長在白升詞條上的機率」
+export function findConflicts(core, type, rules) {
+  const have = new Set(core.subs.map((s) => s.stat));
+  const w = rules.scoring.weights[core.build][type];
+  const left = rules.rarities[core.rarity] ? upgradesLeft(core.level, core.rarity, rules) : 0;
+  return (rules.conflicts || [])
+    .map((c) => {
+      const a = c.a.filter((k) => have.has(k));
+      const b = c.b.filter((k) => have.has(k));
+      if (a.length === 0 || b.length === 0) return null;
+      const wasted = [...a, ...b].filter((k) => !(w[k] > 0));
+      const prob = core.subs.length > 0 ? wasted.length / core.subs.length : 0;
+      return {
+        stats: [...a, ...b],
+        aLabel: c.aLabel,
+        bLabel: c.bLabel,
+        why: c.why,
+        wasted,
+        prob,
+        left,
+        expectedWasted: left * prob,
+      };
+    })
+    .filter(Boolean);
+}

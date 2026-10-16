@@ -18,7 +18,9 @@ function whoText(best) {
   const names = best.companions.map((c) => c.name);
   if (names.length === 1) return names[0];
   const head = names.slice(0, 2).join('、');
-  return `${TYPE_LABEL[best.type]}搭檔（${head}${names.length > 2 ? `等 ${names.length} 位` : ''}）`;
+  // 不同型別同分時（例如防禦型和生命型都 80），兩種都寫出來
+  const types = [...new Set(best.companions.map((c) => c.type))].map((t) => TYPE_LABEL[t]).join('和');
+  return `${types}搭檔（${head}${names.length > 2 ? `等 ${names.length} 位` : ''}）`;
 }
 
 function verdictSentence(model) {
@@ -33,6 +35,30 @@ function verdictSentence(model) {
     : '沒有搭檔特別需要它，拆掉換芯核能量。';
 }
 
+function renderConflicts(model, rules, esc) {
+  if (!model.conflicts || model.conflicts.length === 0) return '';
+  const typeName = TYPE_LABEL[model.best.type];
+  return model.conflicts
+    .map((c) => {
+      const names = c.stats.map((k) => rules.stats[k].label).join('、');
+      const wastedNames = c.wasted.map((k) => rules.stats[k].label).join('、');
+      let future;
+      if (c.left === 0) future = '這顆已經升滿，只影響現在的分數。';
+      else if (c.wasted.length === 0) future = '';
+      else future = `給${typeName}用的話，之後每次強化約 ${Math.round(c.prob * 100)}% 會長在${wastedNames}上等於白升；剩下 ${c.left} 次，平均白升 ${fmtHits(c.expectedWasted)} 次。`;
+      return `
+        <div class="conflict" role="note">
+          <b>詞條衝突：${esc(names)}</b>
+          <p>沒有搭檔同時吃${esc(c.aLabel)}和${esc(c.bLabel)}，不管給誰用，至少有一邊是浪費的。${esc(future)}</p>
+        </div>`;
+    })
+    .join('');
+}
+
+function fmtHits(n) {
+  return (Math.round(n * 10) / 10).toString();
+}
+
 function renderVerdict(model, rules, esc) {
   const { verdict, best, growth, core } = model;
   const rarity = rules.rarities[core.rarity];
@@ -40,6 +66,7 @@ function renderVerdict(model, rules, esc) {
   if (growth) pills.push(`<span class="pill g-${growth.label}">${esc(growth.labelText)}</span>`);
   if (rarity && rarity.tag && rarity.scored) pills.push(`<span class="pill p-tag">${esc(rarity.tag)}</span>`);
   if (growth && growth.premiumSeed) pills.push('<span class="pill p-seed">極品胚子</span>');
+  if (model.conflicts && model.conflicts.length) pills.push('<span class="pill p-conflict">詞條衝突</span>');
   return `
     <section class="verdict v-${verdict.key}" aria-labelledby="v-title">
       <div class="v-top">
@@ -51,6 +78,7 @@ function renderVerdict(model, rules, esc) {
       </div>
       <p class="v-sentence">${esc(verdictSentence(model))}</p>
       ${pills.length ? `<div class="pills">${pills.join('')}</div>` : ''}
+      ${renderConflicts(model, rules, esc)}
     </section>`;
 }
 

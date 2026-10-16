@@ -1,0 +1,1236 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>芯核適配度檢查器</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Nunito:wght@700;800;900&display=swap">
+<style>
+/* 版面：手機單欄卡片流。上半輸入、下半結論卡 → 長歪 → 篩選 → 清單；「清空重填／檢查」固定在拇指區 */
+:root {
+  --bg: #fff6f8;
+  --surface: #ffffff;
+  --surface-2: #fdecf2;
+  --ink: #43263a;
+  --ink-soft: #86677a;
+  --line: #f4d3df;
+  --pink: #f07ca5;
+  --pink-strong: #c94477;
+  --pink-wash: #ffe3ee;
+  --on-pink: #ffffff;
+  --lav: #8f78d6;
+  --lav-soft: #efeafb;
+  --good: #2b8f62;
+  --good-soft: #e0f3e9;
+  --warn: #b57a06;
+  --warn-soft: #fbefd5;
+  --muted: #a8949f;
+  --muted-soft: #f2eaee;
+  --bad: #c73a5e;
+  --bad-soft: #fde4ea;
+  --r-ssr: #e2a93b;
+  --r-sr: #a479e0;
+  --r-r: #4f93dd;
+  --st-1: #4fb37f;
+  --st-2: #4996df;
+  --st-3: #9a6fe0;
+  --st-4: #e3b52f;
+  --st-5: #e2575c;
+  --st-6: #f08ab3;
+  --shadow: 0 10px 28px -16px rgba(201, 68, 119, 0.45);
+  --font-display: "Nunito", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --radius-lg: 26px;
+  --radius: 16px;
+  --radius-sm: 11px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #2a1120; --surface: #3a1a2e; --surface-2: #47223a; --ink: #ffd8e6; --ink-soft: #d9a5bd; --line: #5e2d4a;
+    --pink: #ff8fb8; --pink-strong: #ff86b3; --pink-wash: #57243f; --on-pink: #2a1120; --lav: #c3b0ff; --lav-soft: #3f2b55;
+    --good: #72d8a5; --good-soft: #1f3b30; --warn: #f2c35c; --warn-soft: #3f3120; --muted: #a98b9b; --muted-soft: #45283a;
+    --bad: #ff8ea8; --bad-soft: #4c1f30; --shadow: 0 10px 28px -16px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #2a1120; --surface: #3a1a2e; --surface-2: #47223a; --ink: #ffd8e6; --ink-soft: #d9a5bd; --line: #5e2d4a;
+  --pink: #ff8fb8; --pink-strong: #ff86b3; --pink-wash: #57243f; --on-pink: #2a1120; --lav: #c3b0ff; --lav-soft: #3f2b55;
+  --good: #72d8a5; --good-soft: #1f3b30; --warn: #f2c35c; --warn-soft: #3f3120; --muted: #a98b9b; --muted-soft: #45283a;
+  --bad: #ff8ea8; --bad-soft: #4c1f30; --shadow: 0 10px 28px -16px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px calc(96px + env(safe-area-inset-bottom, 0px));
+}
+.wrap { max-width: 480px; margin: 0 auto; display: grid; gap: 16px; }
+.num { font-family: var(--font-display); font-variant-numeric: tabular-nums; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--lav); outline-offset: 2px; }
+
+/* 頂部 */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 4px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand svg { width: 34px; height: 34px; flex: none; }
+.brand h1 { font-size: 19px; font-weight: 700; letter-spacing: 0.02em; }
+.brand p { margin: 0; font-size: 12px; color: var(--ink-soft); }
+.builds { display: inline-flex; background: var(--surface-2); border-radius: 999px; padding: 3px; gap: 2px; }
+.build-btn { border: 0; background: transparent; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 500; color: var(--ink-soft); }
+.build-btn.on { background: var(--surface); color: var(--pink-strong); box-shadow: var(--shadow); font-weight: 700; }
+
+/* 卡片 */
+.card { background: var(--surface); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow); display: grid; gap: 14px; min-width: 0; }
+.card h2 { font-size: 17px; font-weight: 700; }
+.hint { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+
+/* 輸入 */
+.form { gap: 18px; }
+.example-note { background: var(--lav-soft); color: var(--ink); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13px; }
+.field { display: grid; gap: 8px; min-width: 0; }
+.label { font-size: 13px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.04em; }
+.opt { font-weight: 400; letter-spacing: 0; margin-left: 4px; }
+.field-msg, .form-errors { font-size: 13px; color: var(--bad); }
+.form-errors { background: var(--bad-soft); border-radius: var(--radius-sm); padding: 10px 12px; }
+
+.slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.slot-btn { display: grid; justify-items: center; gap: 2px; padding: 10px 4px 8px; border-radius: var(--radius); border: 2px solid var(--line); background: var(--surface); }
+.slot-btn svg { width: 30px; height: 30px; fill: var(--surface-2); stroke: var(--pink); stroke-width: 1.6; }
+.slot-sym { font-family: var(--font-display); font-weight: 800; font-size: 15px; line-height: 1.2; }
+.slot-nick { font-size: 12px; color: var(--ink-soft); }
+.slot-btn.on { border-color: var(--pink); background: var(--pink-wash); }
+.slot-btn.on svg { fill: var(--pink); stroke: var(--pink-strong); }
+
+.rarities { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rar-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 6px; border-radius: var(--radius); border: 2px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px; }
+.rar-swatch { width: 14px; height: 14px; border-radius: 5px; transform: rotate(45deg); flex: none; }
+.rar-SSR .rar-swatch { background: var(--r-ssr); }
+.rar-SR .rar-swatch { background: var(--r-sr); }
+.rar-R .rar-swatch { background: var(--r-r); }
+.rar-btn.on { border-color: var(--pink); background: var(--pink-wash); font-weight: 700; }
+
+.stellas { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.st-btn { display: grid; justify-items: center; gap: 3px; padding: 6px 0; border: 0; background: transparent; border-radius: var(--radius-sm); }
+.st-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--dot); border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--line); }
+.st-name { font-size: 11.5px; color: var(--ink-soft); }
+.st-btn.on .st-dot { box-shadow: 0 0 0 2px var(--pink-strong); }
+.st-btn.on .st-name { color: var(--ink); font-weight: 700; }
+
+.stepper { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.step-btn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--pink-strong); font-size: 22px; font-weight: 700; line-height: 1; }
+.step-btn:disabled { opacity: 0.4; cursor: default; }
+.lv-val { font-family: var(--font-display); font-weight: 900; font-size: 26px; min-width: 54px; text-align: center; font-variant-numeric: tabular-nums; }
+.lv-note { font-size: 12.5px; color: var(--ink-soft); }
+
+select, input {
+  width: 100%; min-width: 0; height: 44px; padding: 0 10px; border-radius: var(--radius-sm);
+  border: 2px solid var(--line); background: var(--surface); font-size: 15px;
+}
+input { font-family: var(--font-display); font-variant-numeric: tabular-nums; font-weight: 700; }
+input::placeholder { font-family: var(--font-body); font-weight: 400; color: var(--muted); font-size: 13px; }
+select:disabled, input:disabled { background: var(--muted-soft); color: var(--muted); }
+.bad { border-color: var(--bad) !important; background: var(--bad-soft); }
+.main-fixed { height: 44px; display: flex; align-items: center; padding: 0 12px; border-radius: var(--radius-sm); background: var(--surface-2); font-weight: 500; }
+
+.subs-head, .sub-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1.1fr); gap: 8px; }
+.subs-head span { font-size: 12px; color: var(--ink-soft); padding-left: 4px; }
+.sub-msg { display: grid; gap: 2px; font-size: 12.5px; margin-top: -2px; }
+.m-bad { color: var(--bad); }
+.hits { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.why td small { font-size: 11px; color: var(--warn); margin-left: 4px; font-family: var(--font-body); }
+
+/* 結果 */
+.result-empty { text-align: center; color: var(--ink-soft); font-size: 14px; padding: 22px 12px; border: 2px dashed var(--line); border-radius: var(--radius-lg); display: grid; gap: 10px; justify-items: center; }
+.result-empty p { margin: 0; }
+.link-btn { border: 0; background: var(--surface-2); color: var(--pink-strong); font-weight: 700; font-size: 14px; border-radius: 999px; padding: 8px 16px; }
+#result { display: grid; gap: 16px; scroll-margin-top: 12px; }
+
+.verdict { border-radius: var(--radius-lg); padding: 20px; display: grid; gap: 12px; background: var(--surface); box-shadow: var(--shadow); border: 3px solid var(--line); }
+.v-keep { border-color: var(--good); background: linear-gradient(160deg, var(--good-soft), var(--surface) 70%); }
+.v-hold { border-color: var(--warn); background: linear-gradient(160deg, var(--warn-soft), var(--surface) 70%); }
+.v-scrap { border-color: var(--muted); background: linear-gradient(160deg, var(--muted-soft), var(--surface) 70%); }
+.v-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; color: var(--ink-soft); }
+.v-title { font-size: 30px; font-weight: 700; line-height: 1.25; }
+.v-keep .v-title { color: var(--good); }
+.v-hold .v-title { color: var(--warn); }
+.v-scrap .v-title { color: var(--ink-soft); }
+.v-score { display: grid; justify-items: center; background: var(--surface); border-radius: 20px; padding: 8px 14px 6px; box-shadow: var(--shadow); flex: none; }
+.v-score .num { font-size: 36px; font-weight: 900; line-height: 1; color: var(--pink-strong); }
+.v-score-lbl { font-size: 11px; color: var(--ink-soft); }
+.v-sentence { margin: 0; font-size: 15.5px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 11px; font-size: 13px; font-weight: 700; background: var(--surface-2); color: var(--ink); }
+.g-great { background: var(--good-soft); color: var(--good); }
+.g-normal { background: var(--warn-soft); color: var(--warn); }
+.g-bad { background: var(--bad-soft); color: var(--bad); }
+.g-notStarted { background: var(--lav-soft); color: var(--lav); }
+.p-tag { background: var(--lav-soft); color: var(--lav); }
+.p-seed { background: var(--pink-wash); color: var(--pink-strong); }
+.p-conflict { background: var(--warn-soft); color: var(--warn); }
+.conflict { background: var(--warn-soft); border-radius: var(--radius); padding: 10px 12px; display: grid; gap: 4px; font-size: 14px; }
+.conflict b { color: var(--warn); }
+.conflict p { margin: 0; }
+
+.g-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.g-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.g-stats > div { display: grid; justify-items: center; background: var(--surface-2); border-radius: var(--radius); padding: 10px 4px 8px; }
+.g-stats .num { font-size: 26px; font-weight: 900; line-height: 1.1; }
+.g-stats span:last-child { font-size: 12px; color: var(--ink-soft); }
+.g-advice { margin: 0; }
+.g-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.g-rows li { display: inline-flex; gap: 6px; align-items: baseline; padding: 5px 12px; border-radius: 999px; background: var(--muted-soft); color: var(--ink-soft); font-size: 14px; }
+.g-rows li.good { background: var(--pink-wash); color: var(--pink-strong); font-weight: 700; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 13px; font-size: 13.5px; }
+.chip.on { background: var(--pink-strong); border-color: var(--pink-strong); color: var(--on-pink); font-weight: 700; }
+
+.lead-group { display: grid; gap: 4px; }
+.lead-group h3 { font-size: 14px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.06em; padding: 4px 2px 0; }
+.c-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.c-list details { border-radius: var(--radius); background: var(--bg); }
+.c-list details[open] { background: var(--surface-2); }
+.c-list summary { list-style: none; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto 44px; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; border-radius: var(--radius); }
+.c-list summary::-webkit-details-marker { display: none; }
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot-green { background: var(--good); }
+.dot-yellow { background: var(--warn); }
+.dot-gray { background: var(--muted); }
+.c-name { font-weight: 500; overflow-wrap: anywhere; }
+.type-chip { font-size: 11.5px; font-weight: 700; border-radius: 7px; padding: 1px 6px; background: var(--muted-soft); color: var(--ink-soft); }
+.t-atk { background: var(--pink-wash); color: var(--pink-strong); }
+.t-def { background: var(--lav-soft); color: var(--lav); }
+.t-hp { background: var(--good-soft); color: var(--good); }
+.c-score { text-align: right; font-size: 19px; font-weight: 900; }
+.q { font-size: 11px; color: var(--warn); margin-left: 1px; font-family: var(--font-body); }
+
+.why { padding: 0 12px 12px; display: grid; gap: 8px; font-size: 13.5px; min-width: 0; }
+.why p { margin: 0; }
+.why-table { overflow-x: auto; }
+.why table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.why th { text-align: left; font-weight: 500; color: var(--ink-soft); padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.why td { padding: 5px 6px; border-bottom: 1px solid var(--line); }
+.w-good td:last-child { color: var(--pink-strong); font-weight: 700; }
+.w-some td:last-child { color: var(--ink-soft); }
+.w-none td { color: var(--muted); }
+.unknown-note { background: var(--warn-soft); color: var(--ink); padding: 8px 10px; border-radius: var(--radius-sm); }
+.src { font-size: 12px; color: var(--ink-soft); overflow-wrap: anywhere; }
+.src a { color: var(--pink-strong); }
+
+.foot { font-size: 12px; color: var(--ink-soft); display: grid; gap: 4px; padding: 0 4px; }
+.foot p { margin: 0; }
+
+/* 底部操作列 */
+.actions {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg); border-top: 1px solid var(--line);
+}
+.actions-in { max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.btn { height: 52px; border-radius: 999px; border: 0; font-size: 16px; font-weight: 700; }
+.btn-ghost { background: var(--surface-2); color: var(--ink); }
+.btn-main { background: var(--pink-strong); color: var(--on-pink); box-shadow: var(--shadow); letter-spacing: 0.1em; }
+.btn-main:active { transform: translateY(1px); }
+
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 34 34" aria-hidden="true">
+        <polygon points="17,2 31,17 17,32 3,17" fill="var(--pink-wash)" stroke="var(--pink)" stroke-width="2" stroke-linejoin="round"/>
+        <polygon points="17,9 24,17 17,25 10,17" fill="var(--pink)"/>
+      </svg>
+      <div>
+        <h1>芯核適配度檢查器</h1>
+        <p>戀與深空 · 升、留、拆一次看</p>
+      </div>
+    </div>
+    <div class="builds" role="radiogroup" aria-label="流派">
+      <button type="button" class="build-btn" id="build-crit" data-build="crit" role="radio" aria-checked="true">暴擊流</button>
+      <button type="button" class="build-btn" id="build-weak" data-build="weak" role="radio" aria-checked="false">虛弱流</button>
+    </div>
+  </header>
+
+  <section class="card form" id="form" aria-label="輸入芯核"></section>
+  <div class="form-errors" id="form-errors" role="alert" hidden></div>
+
+  <div class="result-empty" id="result-empty">
+    <p>填好芯核後按「檢查」，結論和 27 個搭檔的分數會出現在這裡。</p>
+    <button type="button" class="link-btn" id="btn-example">先看範例芯核的結果</button>
+  </div>
+  <div id="result" aria-live="polite"></div>
+
+  <footer class="foot">
+    <p>分數是依權重估的適配度，不是實際傷害。權重是第一版估值，還要拿真實芯核校準。</p>
+    <p>搭檔型別查自 BWIKI 和英文 wiki（2026-10-16），台服譯名可能不同，以遊戲內為準。</p>
+  </footer>
+</div>
+
+<div class="actions">
+  <div class="actions-in">
+    <button type="button" class="btn btn-ghost" id="btn-reset">清空重填</button>
+    <button type="button" class="btn btn-main" id="btn-check">檢查</button>
+  </div>
+</div>
+
+<script type="application/json" id="rules-data">{"version":1,"_doc":"芯核適配度檢查器的所有數字。對應 docs/spec.md 第 2 節（芯核系統規則）、第 5 節（評分規則）、第 6 節（長歪判定）、第 7 節（結果門檻）。改權重或門檻只要改這裡，不用動程式。","stats":{"critRate":{"label":"暴擊","unit":"%"},"critDmg":{"label":"暴傷","unit":"%"},"weakDmg":{"label":"虛弱增傷","unit":"%"},"atkPct":{"label":"攻擊加成","unit":"%"},"defPct":{"label":"防禦加成","unit":"%"},"hpPct":{"label":"生命加成","unit":"%"},"atkFlat":{"label":"攻擊","unit":""},"defFlat":{"label":"防禦","unit":""},"hpFlat":{"label":"生命","unit":""},"energyRegen":{"label":"加速回能","unit":"%"},"oathEnergy":{"label":"誓約回能","unit":"%"},"oathDmg":{"label":"誓約增傷","unit":"%"}},"rarities":{"SSR":{"label":"金 SSR","maxLevel":15,"scored":true,"scoreMultiplier":1,"tag":null},"SR":{"label":"紫 SR","maxLevel":12,"scored":true,"scoreMultiplier":0.6,"tag":"過渡用"},"R":{"label":"藍 R","maxLevel":9,"scored":false,"scoreMultiplier":0,"tag":"直接拆"}},"slots":{"alpha":{"symbol":"α","nick":"錐子","card":"日冕卡","mainOptions":["hpFlat"],"mainFixed":"hpFlat"},"beta":{"symbol":"β","nick":"方塊","card":"日冕卡","mainOptions":["atkPct","defPct","hpPct","oathEnergy","oathDmg","energyRegen"],"mainFixed":null},"gamma":{"symbol":"γ","nick":"海膽","card":"月暉卡","mainOptions":["atkFlat"],"mainFixed":"atkFlat"},"delta":{"symbol":"δ","nick":"三角","card":"月暉卡","mainOptions":["atkPct","defPct","hpPct","critRate","critDmg","weakDmg"],"mainFixed":null}},"mainStatAt15":{"_doc":"SSR 主詞條 +15 參考值（只用來顯示，不參與計算）","hpFlat":3000,"atkFlat":200,"energyRegen":24,"oathDmg":14,"critRate":11.2,"weakDmg":18.2},"stellactra":["綠珥","藍弧","紫輝","黃璃","紅漪","粉珀"],"upgradeEvery":3,"maxSubstats":4,"maxHitsPerSub":7,"_maxHitsDoc":"一條副詞條最多被強化幾次：+15 的 5 次＋天生 2 條時 0 級補償的 2 次","subOptions":["critRate","critDmg","weakDmg","oathDmg","atkPct","defPct","hpPct","atkFlat","defFlat","hpFlat"],"substats":{"_doc":"SSR 副詞條。initMin/initMax＝初始值範圍；stepMin/stepMax＝每次強化範圍；cap＝規格書的理論上限（以強化 5 次計，只供參考；天生 2 條的芯核單條最多可到 7 次，會超過）；grid＝評分用的 1 格（單次強化最大值）。強化次數直接用遊戲裡詞條旁的黃色數字，不再從數值反推","critRate":{"initMin":1.1,"initMax":1.6,"stepMin":0.55,"stepMax":0.8,"cap":5.6,"grid":0.8},"critDmg":{"initMin":2.2,"initMax":3.2,"stepMin":1.1,"stepMax":1.6,"cap":11.2,"grid":1.6},"weakDmg":{"initMin":1.8,"initMax":2.6,"stepMin":0.9,"stepMax":1.3,"cap":9.1,"grid":1.3},"atkPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"defPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"hpPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"atkFlat":{"initMin":40,"initMax":60,"stepMin":20,"stepMax":30,"cap":210,"grid":30,"mid":25},"defFlat":{"initMin":20,"initMax":30,"stepMin":10,"stepMax":15,"cap":105,"grid":15,"mid":12.5},"oathDmg":{"initMin":0.8,"initMax":1.2,"stepMin":0.4,"stepMax":0.6,"cap":4.2,"grid":0.6,"_source":"7723 攻略（https://3g.7723.cn/strategy/277202.html）；遊戲截圖 ×1＝1.4% 落在範圍內"},"hpFlat":{"initMin":800,"initMax":1200,"stepMin":400,"stepMax":600,"cap":4200,"grid":600}},"conflicts":[{"a":["hpPct","hpFlat"],"b":["defPct","defFlat"],"aLabel":"生命","bLabel":"防禦","why":"已查到的搭檔倍率都是「攻擊＋防禦」「攻擊＋生命」或只有攻擊，沒有搭檔同時吃生命和防禦"}],"fallbackGrids":{"base":2,"perHit":1,"_doc":"備用：查不到 1 格是多少的詞條（grid 填 null）時，初始一條算 2 格、每強化一次＋1 格。目前所有詞條都有範圍，沒用到"},"scoring":{"mainShare":0.35,"subShare":0.65,"_weightsDoc":"副詞條權重：weights[流派][搭檔型別][詞條]。第一版估值，待真實芯核校準。誓約增傷 0.5 是暫定值（只加誓約技一招）。","weights":{"crit":{"atk":{"critRate":1,"critDmg":1,"weakDmg":0.6,"oathDmg":0.5,"atkPct":0.8,"defPct":0,"hpPct":0,"atkFlat":0.4,"defFlat":0,"hpFlat":0},"def":{"critRate":1,"critDmg":1,"weakDmg":0.6,"oathDmg":0.5,"atkPct":0.4,"defPct":0.8,"hpPct":0,"atkFlat":0.2,"defFlat":0.4,"hpFlat":0},"hp":{"critRate":1,"critDmg":1,"weakDmg":0.6,"oathDmg":0.5,"atkPct":0.4,"defPct":0,"hpPct":0.8,"atkFlat":0.2,"defFlat":0,"hpFlat":0.4}},"weak":{"atk":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"oathDmg":0.5,"atkPct":0.8,"defPct":0,"hpPct":0,"atkFlat":0.4,"defFlat":0,"hpFlat":0},"def":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"oathDmg":0.5,"atkPct":0.4,"defPct":0.8,"hpPct":0,"atkFlat":0.2,"defFlat":0.4,"hpFlat":0},"hp":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"oathDmg":0.5,"atkPct":0.4,"defPct":0,"hpPct":0.8,"atkFlat":0.2,"defFlat":0,"hpFlat":0.4}}},"_mainDoc":"主詞條分數（只算 β、δ）。fixed 裡的詞條直接給分；typedPct 是「對應型別的加成」；otherPct 是不對應的加成。δ 虛弱流的暴擊／暴傷 0.3 是沿用副詞條權重的假設，規格書沒寫。","main":{"beta":{"crit":{"fixed":{"energyRegen":1,"oathEnergy":1,"oathDmg":1},"typedPct":0.8,"otherPct":0.2},"weak":{"fixed":{"energyRegen":1,"oathEnergy":1,"oathDmg":1},"typedPct":0.8,"otherPct":0.2}},"delta":{"crit":{"fixed":{"critRate":1,"critDmg":1,"weakDmg":0.8},"typedPct":0.8,"otherPct":0.2},"weak":{"fixed":{"weakDmg":1,"critRate":0.3,"critDmg":0.3},"typedPct":0.8,"otherPct":0.2}}},"typePct":{"atk":"atkPct","def":"defPct","hp":"hpPct"},"_unknownDoc":"型別待查的搭檔：三種型別都算，取最低分當保守值，而且不參加「最適合的搭檔」評選","unknownTypePolicy":"min"},"growth":{"goodWeight":0.8,"_labelDoc":"長歪判定的分母是所有強化次數加總（黃色數字加總，含 0 級補償強化）","_ratioDoc":"比例用分子／分母存，避免 2/3 寫成小數時的進位誤差","greatRatio":{"num":2,"den":3},"badRatio":{"num":1,"den":3},"labels":{"notStarted":{"text":"還沒開始長","advice":"還沒有任何強化，先升到 +3 看第一次強化"},"great":{"text":"長得很好","advice":"值得繼續升"},"normal":{"text":"普通","advice":"看適配分決定"},"bad":{"text":"長歪了","advice":"停手，考慮拆掉回收芯核能量"}}},"verdict":{"keepMin":75,"holdMin":55,"texts":{"keep":"留，升滿","hold":"先留著","scrap":"拆"}},"dots":{"greenMin":75,"yellowMin":55}}</script>
+<script type="application/json" id="companions-data">{"version":1,"checkedAt":"2026-10-16","_doc":"27 個搭檔身份。type 只能是 atk／def／hp／unknown。verified＝人工核對過遊戲或 BWIKI 原頁；basis 說明型別是怎麼判定的。aliases 留給台服譯名（還沒填）。","_basisDoc":{"spec":"規格書已核對","bwiki-oath":"BWIKI 誓約技公式（BWIKI 被這個環境的網路政策擋住，是透過網路搜尋讀到頁面內容）","enwiki-oath":"英文 wiki 誓約技公式（BWIKI 搜不到這一頁）","other-skills":"誓約技倍率沒查到，用同一搭檔的其他技能公式推定","none":"查不到"},"leads":[{"id":"xavier","name":"沈星回"},{"id":"zayne","name":"黎深"},{"id":"rafayel","name":"祁煜"},{"id":"sylus","name":"秦徹"},{"id":"caleb","name":"夏以晝"}],"companions":[{"id":"xavier-lumiere","lead":"xavier","name":"光獵","nameEn":"Lumiere","aliases":[],"type":"def","verified":true,"basis":"spec","evidence":"誓約技：1440+780%攻擊力+3060%防禦力","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E:%E6%90%AD%E6%A1%A3/%E5%85%89%E7%8C%8E"},{"id":"xavier-king-of-darknight","lead":"xavier","name":"暗蝕國王","nameEn":"King of Darknight","aliases":[],"type":"hp","verified":false,"basis":"bwiki-oath","evidence":"誓約技：1800+960%攻擊力+86%最大生命值","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E/%E6%90%AD%E6%A1%A3/%E6%9A%97%E8%9A%80%E5%9B%BD%E7%8E%8B"},{"id":"xavier-lightseeker","lead":"xavier","name":"逐光騎士","nameEn":"Lightseeker","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Galactic Pulse：1440+1920% ATK","source":"https://loveanddeepspace.wiki.gg/wiki/Xavier:_Lightseeker"},{"id":"xavier-deepspace-hunter","lead":"xavier","name":"深空獵人","nameEn":"Deepspace Hunter","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「星爆」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E:%E6%90%AD%E6%A1%A3/%E6%B7%B1%E7%A9%BA%E7%8C%8E%E4%BA%BA"},{"id":"xavier-distant-youth","lead":"xavier","name":"遙遠少年","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「星願」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E:%E6%90%AD%E6%A1%A3/%E9%81%A5%E8%BF%9C%E5%B0%91%E5%B9%B4"},{"id":"xavier-evol-police","lead":"xavier","name":"Evol 特警","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「光源共振」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E/%E6%90%AD%E6%A1%A3/Evol%E7%89%B9%E8%AD%A6"},{"id":"zayne-foreseer","lead":"zayne","name":"永恆先知","nameEn":"Foreseer","aliases":[],"type":"def","verified":true,"basis":"spec","evidence":"誓約技「冰之牢」：1440+780%攻擊力+3060%防禦力","source":"https://wiki.biligame.com/lysk/%E9%BB%8E%E6%B7%B1:%E6%90%AD%E6%A1%A3/%E6%B0%B8%E6%81%92%E5%85%88%E7%9F%A5"},{"id":"zayne-god-of-annihilation","lead":"zayne","name":"終末之神","nameEn":"God of Annihilation","aliases":[],"type":"hp","verified":false,"basis":"bwiki-oath","evidence":"誓約技：1800+960%攻擊力+86%最大生命值（英文 wiki 同數字；另一次搜尋讀到 1262+674%攻擊力+60.6%最大生命值，都是生命型）","source":"https://wiki.biligame.com/lysk/%E9%BB%8E%E6%B7%B1/%E6%90%AD%E6%A1%A3/%E7%BB%88%E6%9C%AB%E4%B9%8B%E7%A5%9E"},{"id":"zayne-master-of-fate","lead":"zayne","name":"九黎司命","nameEn":"Master of Fate","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「篁山蘊靈」：1440+1920%攻擊力","source":"https://wiki.biligame.com/lysk/%E9%BB%8E%E6%B7%B1:%E6%90%AD%E6%A1%A3/%E4%B9%9D%E9%BB%8E%E5%8F%B8%E5%91%BD"},{"id":"zayne-dawnbreaker","lead":"zayne","name":"黎明抹殺者","nameEn":"Dawnbreaker","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Chilling Blossom（徹骨之華）：1200+1600% ATK","source":"https://loveanddeepspace.miraheze.org/wiki/Zayne:_Dawnbreaker"},{"id":"zayne-linkon-doctor","lead":"zayne","name":"臨空醫生","nameEn":"Linkon Doctor","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Hoarfrost Saber（雪之刃）：1200+1600% ATK","source":"https://loveanddeepspace.miraheze.org/wiki/Zayne:_Linkon_Doctor"},{"id":"zayne-medic-of-the-arctic","lead":"zayne","name":"極地軍醫","nameEn":"Medic of the Arctic","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Relentless Snow（極地冰壑）：1200+1600% ATK","source":"https://loveanddeepspace.miraheze.org/wiki/Zayne:_Medic_of_the_Arctic"},{"id":"rafayel-vermilion-martial-god","lead":"rafayel","name":"赤霄武神","nameEn":"Vermilion Martial God","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Ashen Tempest：1800+2400% ATK","source":"https://loveanddeepspace.wiki.gg/wiki/Rafayel:_Vermilion_Martial_God"},{"id":"rafayel-lemurian-sea-god","lead":"rafayel","name":"利莫里亞海神","nameEn":"Lemurian Sea God","aliases":[],"type":"def","verified":false,"basis":"bwiki-oath","evidence":"誓約技「鑄浪永契」：1800+960%攻擊力+3820%防禦力","source":"https://wiki.biligame.com/lysk/%E7%A5%81%E7%85%9C:%E6%90%AD%E6%A1%A3/%E5%88%A9%E8%8E%AB%E9%87%8C%E4%BA%9A%E6%B5%B7%E7%A5%9E"},{"id":"rafayel-god-of-the-tides","lead":"rafayel","name":"潮汐之神","nameEn":"God of the Tides","aliases":[],"type":"hp","verified":false,"basis":"bwiki-oath","evidence":"誓約技「四海潮生」：1440+780%攻擊力+69.4%最大生命值","source":"https://wiki.biligame.com/lysk/%E7%A5%81%E7%85%9C:%E6%90%AD%E6%A1%A3/%E6%BD%AE%E6%B1%90%E4%B9%8B%E7%A5%9E"},{"id":"rafayel-abysswalker","lead":"rafayel","name":"深海潛行者","nameEn":"Abysswalker","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技：1440+1920%攻擊力","source":"https://wiki.biligame.com/lysk/%E7%A5%81%E7%85%9C:%E6%90%AD%E6%A1%A3/%E6%B7%B1%E6%B5%B7%E6%BD%9C%E8%A1%8C%E8%80%85"},{"id":"rafayel-fresh-paint","lead":"rafayel","name":"畫壇新銳","nameEn":"Fresh Paint","aliases":[],"type":"unknown","verified":false,"basis":"none","evidence":"BWIKI 與英文 wiki 都沒搜到技能頁，只確認這個搭檔存在","source":"https://loveanddeepspace.wiki.gg/wiki/Rafayel"},{"id":"rafayel-artist","lead":"rafayel","name":"藝術家","nameEn":"Artist","aliases":[],"type":"atk","verified":false,"basis":"other-skills","evidence":"誓約技 Searing Motif 依合計攻擊力計算（倍率沒查到）；攻略站標示 scaling on ATK","source":"https://lads-battles.vercel.app/en/characters/rafayel/artist"},{"id":"rafayel-phantom-of-the-siren","lead":"rafayel","name":"海妖魅影","nameEn":"Phantom of the Siren","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Sonata of Reunions：1200+1600% ATK","source":"https://loveanddeepspace.miraheze.org/wiki/Rafayel:_Phantom_of_the_Siren"},{"id":"sylus-abyss-sovereign","lead":"sylus","name":"深淵主宰","nameEn":"","aliases":[],"type":"hp","verified":true,"basis":"spec","evidence":"誓約技「無厭之瞳」：1440+780%攻擊力+69.4%最大生命值","source":"https://wiki.biligame.com/lysk/%E7%A7%A6%E5%BD%BB:%E6%90%AD%E6%A1%A3/%E6%B7%B1%E6%B8%8A%E4%B8%BB%E5%AE%B0"},{"id":"sylus-silverwing-fiend","lead":"sylus","name":"銀翼惡魔","nameEn":"Silverwing Fiend","aliases":[],"type":"def","verified":false,"basis":"other-skills","evidence":"誓約技「血夜終章」倍率沒查到；協助技 584+311% ATK+1244% DEF、共鳴技 1663+887% ATK+3515% DEF，玩家攻略也稱 DEF scale","source":"https://loveanddeepspace.wiki.gg/wiki/Sylus:_Silverwing_Fiend"},{"id":"sylus-endless-raider","lead":"sylus","name":"無盡掠奪者","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「末日審判」：1440+1920%攻擊力","source":"https://wiki.biligame.com/lysk/%E7%A7%A6%E5%BD%BB:%E6%90%AD%E6%A1%A3/%E6%97%A0%E5%B0%BD%E6%8E%A0%E5%A4%BA%E8%80%85"},{"id":"sylus-otherworldly-visitor","lead":"sylus","name":"異界來客","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「震鳴衝擊」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E7%A7%A6%E5%BD%BB:%E6%90%AD%E6%A1%A3/%E5%BC%82%E7%95%8C%E6%9D%A5%E5%AE%A2"},{"id":"caleb-netherlord","lead":"caleb","name":"冥羅之主","nameEn":"Netherlord","aliases":[],"type":"hp","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Fate Unforgotten：1800+960% ATK+86% Max HP","source":"https://loveanddeepspace.wiki.gg/wiki/Caleb:_Netherlord"},{"id":"caleb-ultimate-weapon-x02","lead":"caleb","name":"終極兵器 X-02","nameEn":"Ultimate Weapon X-02","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「同頻覺醒」期間的同頻攻擊：380+500%攻擊力","source":"https://wiki.biligame.com/lysk/%E5%A4%8F%E4%BB%A5%E6%98%BC:%E6%90%AD%E6%A1%A3/%E7%BB%88%E6%9E%81%E5%85%B5%E5%99%A8X-02"},{"id":"caleb-farspace-colonel","lead":"caleb","name":"遠空執艦官","nameEn":"","aliases":[],"type":"def","verified":false,"basis":"bwiki-oath","evidence":"誓約技「全程封鎖」：1440+780%攻擊力+3060%防禦力","source":"https://wiki.biligame.com/lysk/%E5%A4%8F%E4%BB%A5%E6%98%BC:%E6%90%AD%E6%A1%A3/%E8%BF%9C%E7%A9%BA%E6%89%A7%E8%88%B0%E5%AE%98"},{"id":"caleb-deepspace-pilot","lead":"caleb","name":"深空飛行員","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「合圍行動」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E5%A4%8F%E4%BB%A5%E6%98%BC:%E6%90%AD%E6%A1%A3/%E6%B7%B1%E7%A9%BA%E9%A3%9E%E8%A1%8C%E5%91%98"}]}</script>
+<script>
+(() => {
+'use strict';
+// ---- src/validate.js ----
+// 輸入驗證：只吃資料、吐結果，不碰畫面。
+// core 形狀：
+// { slot, rarity, stellactrum, level, main, build, subs: [{ stat, hits, current }] }
+// hits＝遊戲裡副詞條旁的黃色數字（被強化幾次，含 0 級補償強化；沒有數字就是 0）
+
+const OUT_OF_RANGE = '這個數值不太可能出現，要不要再看一次？';
+
+function isNum(v) {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+
+// 把空白列拿掉，α／γ 自動帶主詞條
+function normalizeCore(core, rules) {
+  const slot = rules.slots[core.slot];
+  const main = slot && slot.mainFixed ? slot.mainFixed : core.main || null;
+  const subs = (core.subs || [])
+    .filter((s) => s && s.stat)
+    .map((s) => ({
+      stat: s.stat,
+      hits: Number.isInteger(s.hits) && s.hits > 0 ? s.hits : 0,
+      current: isNum(s.current) ? s.current : null,
+    }));
+  return {
+    slot: core.slot || null,
+    rarity: core.rarity || null,
+    stellactrum: core.stellactrum || null,
+    level: isNum(core.level) ? core.level : 0,
+    main,
+    build: core.build === 'weak' ? 'weak' : 'crit',
+    subs,
+  };
+}
+
+// 依強化次數推算這條副詞條「合理的數值範圍」；查不到範圍的詞條回傳 null
+function plausibleRange(stat, hits, rules) {
+  const r = rules.substats[stat];
+  if (!r || r.initMin == null) return null;
+  // 不套 cap：cap 是用最多強化 5 次算的，天生 2 條的芯核單條可以被強化到 7 次
+  return {
+    min: r.initMin + hits * r.stepMin,
+    max: r.initMax + hits * r.stepMax,
+  };
+}
+
+// 單一副詞條數值檢查（只有 SSR 有範圍資料）：'ok'｜'out'｜'unknown'
+function checkSubValue(sub, rarity, rules) {
+  if (rarity !== 'SSR' || sub.current == null) return 'ok';
+  const range = plausibleRange(sub.stat, sub.hits, rules);
+  if (!range) return 'unknown';
+  const eps = 1e-9;
+  return sub.current < range.min - eps || sub.current > range.max + eps ? 'out' : 'ok';
+}
+
+function validateCore(rawCore, rules) {
+  const core = normalizeCore(rawCore, rules);
+  const errors = [];
+  const warnings = [];
+
+  const slot = rules.slots[core.slot];
+  if (!slot) errors.push({ field: 'slot', msg: '先選一個槽位' });
+
+  const rarity = rules.rarities[core.rarity];
+  if (!rarity) errors.push({ field: 'rarity', msg: '先選稀有度' });
+
+  if (rarity && (core.level < 0 || core.level > rarity.maxLevel || !Number.isInteger(core.level))) {
+    errors.push({ field: 'level', msg: `等級要在 0 到 ${rarity.maxLevel} 之間` });
+  }
+
+  if (slot && !slot.mainFixed) {
+    if (!core.main) errors.push({ field: 'main', msg: '這個槽位要選主詞條' });
+    else if (!slot.mainOptions.includes(core.main)) {
+      errors.push({ field: 'main', msg: '這個主詞條不會出現在這個槽位' });
+    }
+  }
+
+  if (core.subs.length === 0) {
+    errors.push({ field: 'subs', msg: '至少填一條副詞條' });
+  }
+  if (core.subs.length > rules.maxSubstats) {
+    errors.push({ field: 'subs', msg: `副詞條最多 ${rules.maxSubstats} 條` });
+  }
+
+  const seen = new Set();
+  core.subs.forEach((sub, row) => {
+    if (!rules.subOptions.includes(sub.stat)) {
+      errors.push({ field: 'subs', row, msg: '不認得這個副詞條' });
+      return;
+    }
+    if (seen.has(sub.stat)) errors.push({ field: 'subs', row, msg: '副詞條不能重複' });
+    seen.add(sub.stat);
+    // 主詞條和副詞條本來就可以一樣（例如 α 主詞條生命＋副詞條生命），不檢查
+    if (sub.hits > rules.maxHitsPerSub) {
+      errors.push({ field: 'hits', row, msg: `強化次數最多 ${rules.maxHitsPerSub}` });
+    }
+    if (sub.current == null) {
+      errors.push({ field: 'current', row, msg: '要填目前數值' });
+    }
+    if (checkSubValue(sub, core.rarity, rules) === 'out') {
+      warnings.push({ field: 'current', row, msg: OUT_OF_RANGE });
+    }
+  });
+
+  // 強化次數加總應該≈等級推出來的次數（多出來的是 0 級補償，最多 2 次；
+  // 天生 3 條的芯核 +3 可能是新增第 4 條，所以可以少 1 次）
+  if (rarity && core.subs.length > 0) {
+    const n = Math.floor(core.level / rules.upgradeEvery);
+    const total = core.subs.reduce((a, s) => a + s.hits, 0);
+    if (total > n + 2 || total < n - 1) {
+      warnings.push({ field: 'hits', msg: `黃色數字加起來是 ${total}，+${core.level} 通常是 ${Math.max(0, n - 1)}～${n + 2}，要不要再看一次？` });
+    }
+  }
+
+  return { ok: errors.length === 0, core, errors, warnings };
+}
+
+// ---- src/scoring.js ----
+// 適配分數與總結論：只吃資料、吐結果，不碰畫面。
+
+const TYPES = ['atk', 'def', 'hp'];
+
+// 步驟 1：副詞條換算成格數。查不到 1 格是多少的詞條（誓約增傷）用「2＋強化次數」推估
+function gridsOf(sub, rules) {
+  const r = rules.substats[sub.stat];
+  if (!r || sub.current == null) return 0;
+  if (r.grid == null) return rules.fallbackGrids.base + rules.fallbackGrids.perHit * (sub.hits || 0);
+  return sub.current / r.grid;
+}
+
+function gridsEstimated(stat, rules) {
+  const r = rules.substats[stat];
+  return !!r && r.grid == null;
+}
+
+// 步驟 2＋4 前半：副詞條比＝Σ(格數×權重)／Σ格數
+function subRatio(subs, type, build, rules) {
+  const w = rules.scoring.weights[build][type];
+  let sumGrid = 0;
+  let sumWeighted = 0;
+  const rows = subs.map((sub) => {
+    const grids = gridsOf(sub, rules);
+    const weight = w[sub.stat] ?? 0;
+    sumGrid += grids;
+    sumWeighted += grids * weight;
+    return { stat: sub.stat, grids, weight, weighted: grids * weight, estimated: gridsEstimated(sub.stat, rules) };
+  });
+  return { ratio: sumGrid > 0 ? sumWeighted / sumGrid : 0, rows, sumGrid, sumWeighted };
+}
+
+// 步驟 3：主詞條分數（只算 β、δ；α、γ 回傳 null）
+function mainScore(slot, main, type, build, rules) {
+  const table = rules.scoring.main[slot];
+  if (!table) return null;
+  const t = table[build];
+  if (main in t.fixed) return t.fixed[main];
+  if (main === rules.scoring.typePct[type]) return t.typedPct;
+  if (Object.values(rules.scoring.typePct).includes(main)) return t.otherPct;
+  return 0;
+}
+
+// 單一型別的適配分（已乘上稀有度倍率；藍 R 回傳 null）
+function scoreForType(core, type, rules) {
+  const rarity = rules.rarities[core.rarity];
+  const sub = subRatio(core.subs, type, core.build, rules);
+  const main = mainScore(core.slot, core.main, type, core.build, rules);
+  const { mainShare, subShare } = rules.scoring;
+  const base = main == null ? 100 * sub.ratio : 100 * (mainShare * main + subShare * sub.ratio);
+  const raw = rarity && rarity.scored ? base * rarity.scoreMultiplier : null;
+  return {
+    type,
+    raw,
+    score: raw == null ? null : Math.round(raw),
+    main,
+    ratio: sub.ratio,
+    rows: sub.rows,
+  };
+}
+
+function scoreAllTypes(core, rules) {
+  const out = {};
+  for (const t of TYPES) out[t] = scoreForType(core, t, rules);
+  return out;
+}
+
+// 每個搭檔一筆；型別待查的取三型最低分，並標 unknown
+function scoreCompanions(core, companions, rules) {
+  const byType = scoreAllTypes(core, rules);
+  return companions.map((c) => {
+    if (TYPES.includes(c.type)) {
+      return { companion: c, unknown: false, result: byType[c.type] };
+    }
+    const pick = TYPES.map((t) => byType[t]).reduce((lo, r) => (r.raw ?? -1) < (lo.raw ?? -1) ? r : lo);
+    return { companion: c, unknown: true, result: pick };
+  });
+}
+
+// 找出最適合的搭檔（只看型別已知的）
+function bestOf(scored) {
+  const known = scored.filter((s) => !s.unknown && s.result.score != null);
+  if (known.length === 0) return null;
+  const top = Math.max(...known.map((s) => s.result.raw));
+  const ties = known.filter((s) => s.result.raw === top);
+  return { score: Math.round(top), type: ties[0].companion.type, companions: ties.map((s) => s.companion), result: ties[0].result };
+}
+
+function dotColor(score, rules) {
+  if (score == null) return 'gray';
+  if (score >= rules.dots.greenMin) return 'green';
+  if (score >= rules.dots.yellowMin) return 'yellow';
+  return 'gray';
+}
+
+// 總結論：只看最高分＋長歪標籤
+// growthLabel 是 growth.js 的 label key（notStarted／great／normal／bad）
+function overallVerdict(core, best, growthLabel, rules) {
+  const v = rules.verdict;
+  const rarity = rules.rarities[core.rarity];
+  if (!rarity || !rarity.scored || !best) {
+    return { key: 'scrap', text: v.texts.scrap, reason: 'rarity' };
+  }
+  const s = best.score;
+  if (s >= v.keepMin && growthLabel !== 'bad') return { key: 'keep', text: v.texts.keep, reason: 'score' };
+  if (s >= v.keepMin) return { key: 'hold', text: v.texts.hold, reason: 'grewBadly' };
+  if (s >= v.holdMin) return { key: 'hold', text: v.texts.hold, reason: 'score' };
+  return { key: 'scrap', text: v.texts.scrap, reason: 'score' };
+}
+
+// ---- src/growth.js ----
+// 長歪判定：只吃資料、吐結果，不碰畫面。
+// 強化次數直接用遊戲裡副詞條旁的黃色數字（sub.hits），不再從數值反推。
+
+// 依等級推出來的強化次數 n＝目前等級 ÷ 3 取整數
+function upgradesSoFar(level, rules) {
+  return Math.floor(level / rules.upgradeEvery);
+}
+
+// 剩餘強化次數
+function upgradesLeft(level, rarityKey, rules) {
+  const max = rules.rarities[rarityKey].maxLevel;
+  return Math.max(0, Math.floor((max - level) / rules.upgradeEvery));
+}
+
+// 好詞條＝對指定型別權重 ≥ goodWeight 的詞條
+function goodStatsFor(type, build, rules) {
+  const w = rules.scoring.weights[build][type];
+  return Object.keys(w).filter((k) => w[k] >= rules.growth.goodWeight);
+}
+
+// n＝等級推出來的強化次數；total＝黃色數字加總（含 0 級補償強化）
+// 還沒升到 +3 一律算「還沒開始長」，0 級補償只是初始抽到的
+function growthLabel(n, total, goodHits, rules) {
+  if (n === 0 || total === 0) return 'notStarted';
+  const { greatRatio: g, badRatio: b } = rules.growth;
+  if (goodHits * g.den >= total * g.num) return 'great';
+  if (goodHits * b.den <= total * b.num) return 'bad';
+  return 'normal';
+}
+
+function joinOr(labels) {
+  if (labels.length <= 1) return labels.join('');
+  return labels.slice(0, -1).join('、') + '或' + labels[labels.length - 1];
+}
+
+// type＝分數最高那個搭檔的型別
+function analyzeGrowth(core, type, rules) {
+  const n = upgradesSoFar(core.level, rules);
+  const good = new Set(goodStatsFor(type, core.build, rules));
+  const rows = core.subs.map((sub) => ({ stat: sub.stat, good: good.has(sub.stat), hits: sub.hits }));
+  const totalHits = rows.reduce((a, r) => a + r.hits, 0);
+  const goodHits = rows.filter((r) => r.good).reduce((a, r) => a + r.hits, 0);
+  const label = growthLabel(n, totalHits, goodHits, rules);
+
+  const left = rules.rarities[core.rarity] ? upgradesLeft(core.level, core.rarity, rules) : 0;
+  const goodRows = rows.filter((r) => r.good);
+  const prob = rows.length > 0 ? goodRows.length / rows.length : 0;
+  const goodLabels = goodRows.map((r) => rules.stats[r.stat].label);
+
+  let forecast;
+  if (left === 0) forecast = '已經升滿了，不會再長了';
+  else if (goodRows.length === 0) forecast = `還能再長 ${left} 次，但現有副詞條都不是這個搭檔要的`;
+  else forecast = `還能再長 ${left} 次，每次大約 ${Math.round(prob * 100)}% 會長在${joinOr(goodLabels)}上`;
+
+  const premiumSeed = core.rarity === 'SSR' && rows.length === 2 && rows.every((r) => r.good);
+
+  return {
+    n,
+    totalHits,
+    bonusHits: Math.max(0, totalHits - n),
+    goodHits,
+    label,
+    labelText: rules.growth.labels[label].text,
+    advice: rules.growth.labels[label].advice,
+    rows,
+    left,
+    prob,
+    forecast,
+    premiumSeed,
+  };
+}
+
+// 詞條衝突：兩邊的詞條不會同時對任何搭檔有用（例如生命和防禦），只提示、不改分數
+// type＝分數最高那個搭檔的型別，用來算「之後每次強化長在白升詞條上的機率」
+function findConflicts(core, type, rules) {
+  const have = new Set(core.subs.map((s) => s.stat));
+  const w = rules.scoring.weights[core.build][type];
+  const left = rules.rarities[core.rarity] ? upgradesLeft(core.level, core.rarity, rules) : 0;
+  return (rules.conflicts || [])
+    .map((c) => {
+      const a = c.a.filter((k) => have.has(k));
+      const b = c.b.filter((k) => have.has(k));
+      if (a.length === 0 || b.length === 0) return null;
+      const wasted = [...a, ...b].filter((k) => !(w[k] > 0));
+      const prob = core.subs.length > 0 ? wasted.length / core.subs.length : 0;
+      return {
+        stats: [...a, ...b],
+        aLabel: c.aLabel,
+        bLabel: c.bLabel,
+        why: c.why,
+        wasted,
+        prob,
+        left,
+        expectedWasted: left * prob,
+      };
+    })
+    .filter(Boolean);
+}
+
+// ---- src/input.js ----
+// 輸入區畫面：建立表單、把畫面狀態轉成 core、依驗證結果標紅。
+
+const SUB_ROWS = 4;
+
+function urchinPoints() {
+  const pts = [];
+  for (let i = 0; i < 24; i++) {
+    const a = (Math.PI * 2 * i) / 24 - Math.PI / 2;
+    const r = i % 2 === 0 ? 11 : 6.5;
+    pts.push(`${(12 + r * Math.cos(a)).toFixed(2)},${(12 + r * Math.sin(a)).toFixed(2)}`);
+  }
+  return pts.join(' ');
+}
+
+const SLOT_SHAPES = {
+  alpha: '<polygon points="12,2 20,12 12,22 4,12"/>',
+  beta: '<rect x="4" y="4" width="16" height="16" rx="3.5"/>',
+  gamma: `<polygon points="${urchinPoints()}"/>`,
+  delta: '<polygon points="12,3.5 21,19.5 3,19.5" stroke-linejoin="round" stroke-width="2.5"/>',
+};
+
+const STELLA_TOKENS = ['--st-1', '--st-2', '--st-3', '--st-4', '--st-5', '--st-6'];
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+function emptyState(build) {
+  return {
+    slot: null,
+    rarity: 'SSR',
+    stellactrum: null,
+    level: 0,
+    main: null,
+    build: build || 'crit',
+    subs: Array.from({ length: SUB_ROWS }, () => ({ stat: '', hits: 0, current: '' })),
+    isExample: false,
+  };
+}
+
+// 規格書的範例芯核，讓頁面一打開就有結果可看
+function exampleState() {
+  return {
+    slot: 'delta',
+    rarity: 'SSR',
+    stellactrum: '粉珀',
+    level: 9,
+    main: 'critRate',
+    build: 'crit',
+    subs: [
+      { stat: 'critDmg', hits: 2, current: '5.2' },
+      { stat: 'atkPct', hits: 0, current: '8' },
+      { stat: 'critRate', hits: 1, current: '2.0' },
+      { stat: 'hpFlat', hits: 0, current: '900' },
+    ],
+    isExample: true,
+  };
+}
+
+function toNum(s) {
+  if (s === '' || s == null) return null;
+  const n = parseFloat(String(s).replace(/[%,，\s]/g, ''));
+  return Number.isFinite(n) ? n : null;
+}
+
+function stateToCore(state) {
+  return {
+    slot: state.slot,
+    rarity: state.rarity,
+    stellactrum: state.stellactrum,
+    level: state.level,
+    main: state.main,
+    build: state.build,
+    subs: state.subs.map((s) => ({ stat: s.stat, hits: s.hits | 0, current: toNum(s.current) })),
+  };
+}
+
+function buildInputForm(root, rules) {
+  const hitOpts = Array.from({ length: rules.maxHitsPerSub + 1 }, (_, h) => `<option value="${h}">${h === 0 ? '0' : '×' + h}</option>`).join('');
+  const slotBtns = Object.entries(rules.slots)
+    .map(([k, s]) => `
+      <button type="button" class="slot-btn" id="slot-${k}" data-slot="${k}" role="radio" aria-checked="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true">${SLOT_SHAPES[k]}</svg>
+        <span class="slot-sym">${esc(s.symbol)}</span>
+        <span class="slot-nick">${esc(s.nick)}</span>
+      </button>`)
+    .join('');
+
+  const rarityBtns = Object.entries(rules.rarities)
+    .map(([k, r]) => `
+      <button type="button" class="rar-btn rar-${k}" id="rar-${k}" data-rarity="${k}" role="radio" aria-checked="false">
+        <span class="rar-swatch"></span>${esc(r.label)}
+      </button>`)
+    .join('');
+
+  const stellaBtns = rules.stellactra
+    .map((name, i) => `
+      <button type="button" class="st-btn" id="st-${i}" data-st="${esc(name)}" aria-pressed="false" style="--dot: var(${STELLA_TOKENS[i]})">
+        <span class="st-dot"></span><span class="st-name">${esc(name)}</span>
+      </button>`)
+    .join('');
+
+  const subRows = Array.from({ length: SUB_ROWS }, (_, i) => `
+      <div class="sub-row" data-row="${i}">
+        <select id="sub-stat-${i}" aria-label="第 ${i + 1} 條副詞條"></select>
+        <select id="sub-hits-${i}" class="hits" aria-label="第 ${i + 1} 條被強化幾次（黃色數字）">${hitOpts}</select>
+        <input id="sub-cur-${i}" inputmode="decimal" autocomplete="off" aria-label="第 ${i + 1} 條目前數值">
+      </div>
+      <div class="sub-msg" id="sub-msg-${i}" hidden></div>`)
+    .join('');
+
+  root.innerHTML = `
+    <div class="example-note" id="example-note" hidden>
+      目前填的是規格書的範例芯核，按底部「清空重填」就能換成你的。
+    </div>
+    <div class="field">
+      <div class="label" id="lbl-slot">槽位</div>
+      <div class="slots" role="radiogroup" aria-labelledby="lbl-slot">${slotBtns}</div>
+      <div class="field-msg" id="msg-slot" hidden></div>
+    </div>
+    <div class="field">
+      <div class="label" id="lbl-rar">稀有度 <span class="opt">看芯核圖示的框色，不是星譜顏色</span></div>
+      <div class="rarities" role="radiogroup" aria-labelledby="lbl-rar">${rarityBtns}</div>
+      <div class="field-msg" id="msg-rarity" hidden></div>
+    </div>
+    <div class="field">
+      <div class="label">星譜 <span class="opt">選填，只決定能裝哪張卡</span></div>
+      <div class="stellas">${stellaBtns}</div>
+    </div>
+    <div class="field">
+      <div class="label" id="lbl-lv">目前等級</div>
+      <div class="stepper" aria-labelledby="lbl-lv">
+        <button type="button" class="step-btn" id="lv-minus" aria-label="等級減一">−</button>
+        <output class="lv-val" id="lv-val" aria-live="polite">+0</output>
+        <button type="button" class="step-btn" id="lv-plus" aria-label="等級加一">＋</button>
+        <span class="lv-note" id="lv-note"></span>
+      </div>
+      <div class="field-msg" id="msg-level" hidden></div>
+    </div>
+    <div class="field">
+      <label class="label" for="main-stat">主詞條</label>
+      <select id="main-stat"></select>
+      <div class="main-fixed" id="main-fixed" hidden></div>
+      <div class="field-msg" id="msg-main" hidden></div>
+    </div>
+    <div class="field">
+      <div class="label">副詞條 <span class="opt">強化＝詞條旁的黃色數字，沒有就是 0</span></div>
+      <div class="subs-head" aria-hidden="true"><span>詞條</span><span>強化</span><span>數值</span></div>
+      ${subRows}
+      <div class="field-msg" id="msg-subs" hidden></div>
+    </div>`;
+}
+
+function setRadio(root, selector, attr, value) {
+  root.querySelectorAll(selector).forEach((b) => {
+    const on = b.dataset[attr] === value;
+    b.classList.toggle('on', on);
+    if (b.hasAttribute('aria-checked')) b.setAttribute('aria-checked', String(on));
+    if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(on));
+  });
+}
+
+function fillSelect(sel, options, value, rules, placeholder) {
+  const html = [`<option value="">${placeholder}</option>`]
+    .concat(options.map((k) => `<option value="${k}">${esc(rules.stats[k].label)}</option>`))
+    .join('');
+  if (sel.dataset.opts !== options.join(',')) {
+    sel.innerHTML = html;
+    sel.dataset.opts = options.join(',');
+  }
+  sel.value = value || '';
+}
+
+function showMsg(el, text) {
+  el.hidden = !text;
+  el.textContent = text || '';
+}
+
+// 依目前狀態更新畫面；showErrors＝按過「檢查」才顯示必填錯誤
+function syncInputUI(root, state, rules, check, showErrors) {
+  root.querySelector('#example-note').hidden = !state.isExample;
+  setRadio(root, '.slot-btn', 'slot', state.slot);
+  setRadio(root, '.rar-btn', 'rarity', state.rarity);
+  setRadio(root, '.st-btn', 'st', state.stellactrum);
+
+  const rarity = rules.rarities[state.rarity];
+  const max = rarity ? rarity.maxLevel : 15;
+  root.querySelector('#lv-val').textContent = `+${state.level}`;
+  root.querySelector('#lv-minus').disabled = state.level <= 0;
+  root.querySelector('#lv-plus').disabled = state.level >= max;
+  const n = Math.floor(state.level / rules.upgradeEvery);
+  root.querySelector('#lv-note').textContent = `已強化 ${n} 次 · 上限 +${max}`;
+
+  const slot = rules.slots[state.slot];
+  const mainSel = root.querySelector('#main-stat');
+  const mainFixed = root.querySelector('#main-fixed');
+  if (slot && slot.mainFixed) {
+    mainSel.hidden = true;
+    mainFixed.hidden = false;
+    mainFixed.textContent = `${rules.stats[slot.mainFixed].label}（${slot.symbol} 槽固定）`;
+  } else {
+    mainSel.hidden = false;
+    mainFixed.hidden = true;
+    mainSel.disabled = !slot;
+    fillSelect(mainSel, slot ? slot.mainOptions : [], state.main, rules, slot ? '選一個主詞條' : '先選槽位');
+  }
+
+  const errs = showErrors ? check.errors : [];
+  const fieldErr = (f) => errs.find((e) => e.field === f && e.row == null);
+  showMsg(root.querySelector('#msg-slot'), fieldErr('slot')?.msg);
+  showMsg(root.querySelector('#msg-rarity'), fieldErr('rarity')?.msg);
+  showMsg(root.querySelector('#msg-level'), fieldErr('level')?.msg);
+  showMsg(root.querySelector('#msg-main'), fieldErr('main')?.msg);
+  const hitsWarn = check.warnings.find((w) => w.field === 'hits' && w.row == null);
+  showMsg(root.querySelector('#msg-subs'), fieldErr('subs')?.msg || hitsWarn?.msg);
+  mainSel.classList.toggle('bad', !!fieldErr('main'));
+
+  // check.core.subs 會拿掉空白列，所以要把畫面列號對回去
+  const rowMap = [];
+  state.subs.forEach((s, i) => { if (s.stat) rowMap.push(i); });
+
+  state.subs.forEach((sub, i) => {
+    const sel = root.querySelector(`#sub-stat-${i}`);
+    fillSelect(sel, rules.subOptions, sub.stat, rules, '—');
+    const hits = root.querySelector(`#sub-hits-${i}`);
+    const cur = root.querySelector(`#sub-cur-${i}`);
+    hits.value = String(sub.hits | 0);
+    if (document.activeElement !== cur) cur.value = sub.current;
+    const unit = sub.stat ? rules.stats[sub.stat].unit : '';
+    const range = sub.stat ? plausibleRange(sub.stat, sub.hits | 0, rules) : null;
+    cur.placeholder = range ? `約 ${+range.min.toFixed(2)}–${+range.max.toFixed(2)}${unit}` : sub.stat ? '目前數值' : '';
+    hits.disabled = cur.disabled = !sub.stat;
+    [sel, hits, cur].forEach((el) => el.classList.remove('bad'));
+
+    const coreRow = rowMap.indexOf(i);
+    const msgs = [];
+    if (coreRow >= 0) {
+      const own = (list) => list.filter((e) => e.row === coreRow);
+      for (const e of own(errs)) {
+        msgs.push({ kind: 'bad', text: e.msg });
+        (({ hits, current: cur })[e.field] || sel).classList.add('bad');
+      }
+      for (const w of own(check.warnings)) {
+        msgs.push({ kind: 'bad', text: w.msg });
+        ({ hits, current: cur, stat: sel })[w.field]?.classList.add('bad');
+      }
+    }
+    const box = root.querySelector(`#sub-msg-${i}`);
+    box.hidden = msgs.length === 0;
+    box.innerHTML = msgs.map((m) => `<span class="m-${m.kind}">${esc(m.text)}</span>`).join('');
+  });
+}
+
+// ---- src/result.js ----
+// 結果區畫面：總結論卡 → 長歪區塊 → 男主篩選 → 搭檔分數清單。
+
+const TYPE_LABEL = { atk: '攻擊型', def: '防禦型', hp: '生命型', unknown: '待查' };
+const TYPE_SHORT = { atk: '攻', def: '防', hp: '生', unknown: '?' };
+const BASIS_LABEL = {
+  spec: '規格書已核對',
+  'bwiki-oath': 'BWIKI 誓約技公式（透過網路搜尋讀到，還沒人工開頁核對）',
+  'enwiki-oath': '英文 wiki 誓約技公式（BWIKI 搜不到這頁）',
+  'other-skills': '誓約技倍率沒查到，用其他技能的公式推定',
+  none: '查不到',
+};
+
+function fmt(n, d = 1) {
+  return (Math.round(n * 10 ** d) / 10 ** d).toString();
+}
+
+function whoText(best) {
+  const names = best.companions.map((c) => c.name);
+  if (names.length === 1) return names[0];
+  const head = names.slice(0, 2).join('、');
+  // 不同型別同分時（例如防禦型和生命型都 80），兩種都寫出來
+  const types = [...new Set(best.companions.map((c) => c.type))].map((t) => TYPE_LABEL[t]).join('和');
+  return `${types}搭檔（${head}${names.length > 2 ? `等 ${names.length} 位` : ''}）`;
+}
+
+function verdictSentence(model) {
+  const { verdict, best, core } = model;
+  if (verdict.reason === 'rarity') return '藍色芯核不算分，拆掉換芯核能量就好。';
+  const who = whoText(best);
+  if (verdict.key === 'keep') return `這顆很適合${who}，建議升滿。`;
+  if (verdict.reason === 'grewBadly') return `分數夠高，但升級大多長在用不到的詞條上。可以先給${who}用，先別再砸資源升。`;
+  if (verdict.key === 'hold') return `可以先給${who}當過渡，有更好的再換。`;
+  return core.rarity === 'SR'
+    ? '紫色芯核分數打六折後，沒有搭檔特別需要它，拆掉換芯核能量。'
+    : '沒有搭檔特別需要它，拆掉換芯核能量。';
+}
+
+function renderConflicts(model, rules, esc) {
+  if (!model.conflicts || model.conflicts.length === 0) return '';
+  const typeName = TYPE_LABEL[model.best.type];
+  return model.conflicts
+    .map((c) => {
+      const names = c.stats.map((k) => rules.stats[k].label).join('、');
+      const wastedNames = c.wasted.map((k) => rules.stats[k].label).join('、');
+      let future;
+      if (c.left === 0) future = '這顆已經升滿，只影響現在的分數。';
+      else if (c.wasted.length === 0) future = '';
+      else future = `給${typeName}用的話，之後每次強化約 ${Math.round(c.prob * 100)}% 會長在${wastedNames}上等於白升；剩下 ${c.left} 次，平均白升 ${fmtHits(c.expectedWasted)} 次。`;
+      return `
+        <div class="conflict" role="note">
+          <b>詞條衝突：${esc(names)}</b>
+          <p>沒有搭檔同時吃${esc(c.aLabel)}和${esc(c.bLabel)}，不管給誰用，至少有一邊是浪費的。${esc(future)}</p>
+        </div>`;
+    })
+    .join('');
+}
+
+function fmtHits(n) {
+  return (Math.round(n * 10) / 10).toString();
+}
+
+function renderVerdict(model, rules, esc) {
+  const { verdict, best, growth, core } = model;
+  const rarity = rules.rarities[core.rarity];
+  const pills = [];
+  if (growth) pills.push(`<span class="pill g-${growth.label}">${esc(growth.labelText)}</span>`);
+  if (rarity && rarity.tag && rarity.scored) pills.push(`<span class="pill p-tag">${esc(rarity.tag)}</span>`);
+  if (growth && growth.premiumSeed) pills.push('<span class="pill p-seed">極品胚子</span>');
+  if (model.conflicts && model.conflicts.length) pills.push('<span class="pill p-conflict">詞條衝突</span>');
+  return `
+    <section class="verdict v-${verdict.key}" aria-labelledby="v-title">
+      <div class="v-top">
+        <div>
+          <div class="eyebrow">總結論</div>
+          <h2 class="v-title" id="v-title">${esc(verdict.text)}</h2>
+        </div>
+        ${best ? `<div class="v-score"><span class="num">${best.score}</span><span class="v-score-lbl">最高適配分</span></div>` : ''}
+      </div>
+      <p class="v-sentence">${esc(verdictSentence(model))}</p>
+      ${pills.length ? `<div class="pills">${pills.join('')}</div>` : ''}
+      ${renderConflicts(model, rules, esc)}
+    </section>`;
+}
+
+function renderGrowth(model, rules, esc) {
+  const g = model.growth;
+  if (!g) return '';
+  const rows = g.rows
+    .map((r) => `<li class="${r.good ? 'good' : ''}"><span>${esc(rules.stats[r.stat].label)}</span><b class="num">×${r.hits}</b></li>`)
+    .join('');
+  const notes = [];
+  if (g.bonusHits > 0) notes.push(`其中 ${g.bonusHits} 次是 0 級補償強化（天生 2、3 條副詞條的金芯核，0 級就會先送）。`);
+  if (model.core.rarity === 'SR') notes.push('紫芯核的副詞條數值範圍還沒查到，先不檢查數值。');
+  if (g.premiumSeed) notes.push('天生只有 2 條，而且都是好詞條，之後每次強化都會落在它們身上。');
+  return `
+    <section class="card growth" aria-labelledby="g-title">
+      <div class="g-head">
+        <h2 id="g-title">升級長得怎麼樣</h2>
+        <span class="pill g-${g.label}">${esc(g.labelText)}</span>
+      </div>
+      <div class="g-stats">
+        <div><span class="num">${g.totalHits}</span><span>已強化</span></div>
+        <div><span class="num">${g.goodHits}</span><span>落在好詞條</span></div>
+        <div><span class="num">${g.left}</span><span>還能再長</span></div>
+      </div>
+      <p class="g-advice">${esc(g.advice)}。${esc(g.forecast)}。</p>
+      <ul class="g-rows" aria-label="每條副詞條被強化的次數">${rows}</ul>
+      <p class="hint">粉色＝對「${esc(TYPE_LABEL[model.best.type])}」有用的好詞條；×N＝遊戲裡的黃色數字</p>
+      ${notes.map((t) => `<p class="hint">${esc(t)}</p>`).join('')}
+    </section>`;
+}
+
+function renderWhy(item, model, rules, esc) {
+  const { companion: c, result: r, unknown } = item;
+  const rows = r.rows
+    .map((row) => {
+      const verdict = row.weight >= rules.growth.goodWeight ? '加分' : row.weight > 0 ? '小加分' : '沒用';
+      const cls = row.weight >= rules.growth.goodWeight ? 'w-good' : row.weight > 0 ? 'w-some' : 'w-none';
+      return `<tr class="${cls}"><td>${esc(rules.stats[row.stat].label)}</td><td class="num">${fmt(row.grids)} 格${row.estimated ? '<small>推估</small>' : ''}</td><td class="num">×${row.weight}</td><td>${verdict}</td></tr>`;
+    })
+    .join('');
+  const main = r.main == null
+    ? `<p>${esc(rules.slots[model.core.slot].symbol)} 槽的主詞條固定，只看副詞條。</p>`
+    : `<p>主詞條「${esc(rules.stats[model.core.main].label)}」得 <b class="num">${r.main}</b> 分（佔 35%），副詞條比 <b class="num">${fmt(r.ratio * 100, 0)}%</b>（佔 65%）。</p>`;
+  return `
+    <div class="why">
+      ${unknown ? `<p class="unknown-note">這個搭檔的屬性還沒核對，分數僅供參考（先用三種型別裡最低的分數）。</p>` : ''}
+      ${main}
+      <div class="why-table"><table>
+        <thead><tr><th>副詞條</th><th>格數</th><th>權重</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <p class="src">型別：${esc(TYPE_LABEL[c.type])} · ${esc(BASIS_LABEL[c.basis] || '')}<br>
+        ${esc(c.evidence)}<br>
+        <a href="${esc(c.source)}" target="_blank" rel="noopener">看來源</a></p>
+    </div>`;
+}
+
+function renderResult(container, model, rules, data, filter, esc) {
+  if (!model.verdict) {
+    container.innerHTML = '';
+    return;
+  }
+  let html = renderVerdict(model, rules, esc);
+  if (model.scored) {
+    html += renderGrowth(model, rules, esc);
+    const leadChips = [`<button type="button" class="chip ${filter.size === 0 ? 'on' : ''}" data-lead="" aria-pressed="${filter.size === 0}">全部</button>`]
+      .concat(data.leads.map((l) => `<button type="button" class="chip ${filter.has(l.id) ? 'on' : ''}" data-lead="${l.id}" aria-pressed="${filter.has(l.id)}">${esc(l.name)}</button>`))
+      .join('');
+    const groups = data.leads
+      .filter((l) => filter.size === 0 || filter.has(l.id))
+      .map((l) => {
+        const items = model.scored
+          .filter((s) => s.companion.lead === l.id)
+          .sort((a, b) => (b.result.raw ?? -1) - (a.result.raw ?? -1));
+        const lis = items
+          .map((it) => {
+            const color = model.dot(it.result.score);
+            return `
+            <li><details>
+              <summary>
+                <span class="dot dot-${color}" aria-hidden="true"></span>
+                <span class="c-name">${esc(it.companion.name)}</span>
+                <span class="type-chip t-${it.companion.type}" title="${esc(TYPE_LABEL[it.companion.type])}">${TYPE_SHORT[it.companion.type]}</span>
+                <span class="c-score num">${it.result.score ?? '—'}${it.unknown ? '<sup class="q" title="這個搭檔的屬性還沒核對，分數僅供參考">?</sup>' : ''}</span>
+              </summary>
+              ${renderWhy(it, model, rules, esc)}
+            </details></li>`;
+          })
+          .join('');
+        return `<div class="lead-group"><h3>${esc(l.name)}</h3><ul class="c-list">${lis}</ul></div>`;
+      })
+      .join('');
+    html += `
+      <section class="card list" aria-labelledby="l-title">
+        <h2 id="l-title">每個搭檔的分數</h2>
+        <p class="hint">點一列看為什麼。綠點 ≥75、黃點 55–74、灰點 &lt;55；攻／防／生是搭檔吃哪種屬性。</p>
+        <div class="chips" role="group" aria-label="只看這些男主">${leadChips}</div>
+        ${groups}
+      </section>`;
+  }
+  container.innerHTML = html;
+}
+
+// ---- src/app.js ----
+// 把資料、計算模組和畫面接起來。打包時會和其他 src 檔案合成一支 script。
+
+
+
+
+
+function computeModel(core, rules, data) {
+  const v = validateCore(core, rules);
+  if (!v.ok) return { validation: v };
+  const c = v.core;
+  const rarity = rules.rarities[c.rarity];
+  if (!rarity.scored) {
+    return { validation: v, core: c, verdict: overallVerdict(c, null, null, rules) };
+  }
+  const scored = scoreCompanions(c, data.companions, rules);
+  const best = bestOf(scored);
+  const growth = analyzeGrowth(c, best.type, rules);
+  const verdict = overallVerdict(c, best, growth.label, rules);
+  const conflicts = findConflicts(c, best.type, rules);
+  return { validation: v, core: c, scored, best, growth, verdict, conflicts, dot: (s) => dotColor(s, rules) };
+}
+
+const FILTER_KEY = 'protocore-fit:leads';
+const BUILD_KEY = 'protocore-fit:build';
+
+function loadSet(key) {
+  try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); } catch { return new Set(); }
+}
+function save(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* 無痕模式之類的，忽略 */ }
+}
+function loadBuild() {
+  try { return JSON.parse(localStorage.getItem(BUILD_KEY)) === 'weak' ? 'weak' : 'crit'; } catch { return 'crit'; }
+}
+
+function boot() {
+  const rules = JSON.parse(document.getElementById('rules-data').textContent);
+  const data = JSON.parse(document.getElementById('companions-data').textContent);
+  const form = document.getElementById('form');
+  const out = document.getElementById('result');
+  const empty = document.getElementById('result-empty');
+
+  let state = emptyState();
+  state.build = loadBuild();
+  let showErrors = false;
+  const filter = loadSet(FILTER_KEY);
+
+  buildInputForm(form, rules);
+
+  function sync() {
+    const check = validateCore(stateToCore(state), rules);
+    syncInputUI(form, state, rules, check, showErrors);
+    document.querySelectorAll('.build-btn').forEach((b) => {
+      const on = b.dataset.build === state.build;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-checked', String(on));
+    });
+    return check;
+  }
+
+  let lastModel = null;
+  function run(scroll) {
+    showErrors = true;
+    const check = sync();
+    const model = computeModel(stateToCore(state), rules, data);
+    const errBox = document.getElementById('form-errors');
+    if (!check.ok) {
+      errBox.hidden = false;
+      errBox.textContent = `還差一點：${[...new Set(check.errors.map((e) => e.msg))].join('、')}`;
+      if (scroll) errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    errBox.hidden = true;
+    lastModel = model;
+    empty.hidden = true;
+    renderResult(out, model, rules, data, filter, esc);
+    if (scroll) out.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  function edited() {
+    state.isExample = false;
+    sync();
+  }
+
+  form.addEventListener('click', (e) => {
+    const t = e.target.closest('button');
+    if (!t) return;
+    if (t.dataset.slot) {
+      state.slot = t.dataset.slot;
+      const slot = rules.slots[state.slot];
+      if (slot.mainFixed) state.main = slot.mainFixed;
+      else if (!slot.mainOptions.includes(state.main)) state.main = null;
+    } else if (t.dataset.rarity) {
+      state.rarity = t.dataset.rarity;
+      state.level = Math.min(state.level, rules.rarities[state.rarity].maxLevel);
+    } else if (t.dataset.st) {
+      state.stellactrum = state.stellactrum === t.dataset.st ? null : t.dataset.st;
+    } else if (t.id === 'lv-minus') {
+      state.level = Math.max(0, state.level - 1);
+    } else if (t.id === 'lv-plus') {
+      state.level = Math.min(rules.rarities[state.rarity].maxLevel, state.level + 1);
+    } else return;
+    edited();
+  });
+
+  form.addEventListener('change', (e) => {
+    const id = e.target.id;
+    if (id === 'main-stat') state.main = e.target.value || null;
+    const h = id.match(/^sub-hits-(\d)$/);
+    if (h) state.subs[+h[1]].hits = parseInt(e.target.value, 10) || 0;
+    const m = id.match(/^sub-stat-(\d)$/);
+    if (m) {
+      const row = state.subs[+m[1]];
+      row.stat = e.target.value;
+      if (!row.stat) { row.hits = 0; row.current = ''; }
+    }
+    edited();
+  });
+
+  form.addEventListener('input', (e) => {
+    const m = e.target.id.match(/^sub-cur-(\d)$/);
+    if (!m) return;
+    state.subs[+m[1]].current = e.target.value;
+    state.isExample = false;
+  });
+  form.addEventListener('focusout', (e) => {
+    if (/^sub-cur-\d$/.test(e.target.id)) sync();
+  });
+
+  document.querySelectorAll('.build-btn').forEach((b) =>
+    b.addEventListener('click', () => {
+      state.build = b.dataset.build;
+      save(BUILD_KEY, state.build);
+      sync();
+      if (lastModel) run(false);
+    }));
+
+  document.getElementById('btn-check').addEventListener('click', () => run(true));
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    state = emptyState(state.build);
+    showErrors = false;
+    lastModel = null;
+    document.getElementById('form-errors').hidden = true;
+    out.innerHTML = '';
+    empty.hidden = false;
+    sync();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  });
+
+  out.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    const id = chip.dataset.lead;
+    if (!id) filter.clear();
+    else if (filter.has(id)) filter.delete(id);
+    else filter.add(id);
+    if (filter.size === data.leads.length) filter.clear();
+    save(FILTER_KEY, [...filter]);
+    renderResult(out, lastModel, rules, data, filter, esc);
+  });
+
+  document.getElementById('btn-example').addEventListener('click', () => {
+    state = exampleState();
+    state.build = loadBuild();
+    sync();
+    run(true);
+  });
+
+  sync();
+}
+
+boot();
+})();
+</script>
+</body></html>

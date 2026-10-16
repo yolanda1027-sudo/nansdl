@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { rules, screenshotCore } from './helpers.js';
-import { upgradesSoFar, upgradesLeft, goodStatsFor, growthLabel, analyzeGrowth } from '../src/growth.js';
+import { upgradesSoFar, upgradesLeft, goodStatsFor, growthLabel, analyzeGrowth, findConflicts } from '../src/growth.js';
 
 const core = (over = {}) => ({ slot: 'alpha', rarity: 'SSR', level: 0, main: 'hpFlat', build: 'crit', subs: [], ...over });
 
@@ -54,4 +54,34 @@ test('analyzeGrowth：截圖芯核 +0 還沒開始長，還能長 5 次', () => 
   assert.equal(g.label, 'notStarted');
   assert.equal(g.totalHits, 1);
   assert.equal(g.left, 5);
+});
+
+const conflictCore = (over = {}) => core({
+  slot: 'delta', main: 'critRate',
+  subs: [
+    { stat: 'critRate', hits: 0, current: 1.4 },
+    { stat: 'critDmg', hits: 0, current: 2.8 },
+    { stat: 'hpPct', hits: 0, current: 9 },
+    { stat: 'defPct', hits: 0, current: 9 },
+  ],
+  ...over,
+});
+
+test('findConflicts：生命加成＋防禦加成＝衝突；給防禦型時生命加成白升 25%', () => {
+  const [c] = findConflicts(conflictCore(), 'def', rules);
+  assert.deepEqual(c.wasted, ['hpPct']);
+  assert.equal(c.prob, 0.25);
+  assert.equal(c.left, 5);
+  assert.equal(c.expectedWasted, 1.25);
+});
+
+test('findConflicts：給攻擊型時兩條都白升；生命固定值＋防禦加成也算衝突', () => {
+  assert.deepEqual(findConflicts(conflictCore(), 'atk', rules)[0].wasted.sort(), ['defPct', 'hpPct']);
+  const mixed = core({ subs: [{ stat: 'hpFlat', hits: 0, current: 900 }, { stat: 'defPct', hits: 0, current: 8 }] });
+  assert.equal(findConflicts(mixed, 'def', rules).length, 1);
+});
+
+test('findConflicts：沒有衝突回空陣列', () => {
+  const ok = core({ subs: [{ stat: 'hpPct', hits: 0, current: 9 }, { stat: 'atkPct', hits: 0, current: 9 }] });
+  assert.deepEqual(findConflicts(ok, 'hp', rules), []);
 });

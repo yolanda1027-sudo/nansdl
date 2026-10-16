@@ -1,7 +1,7 @@
 // 把資料、計算模組和畫面接起來。打包時會和其他 src 檔案合成一支 script。
 import { validateCore } from './validate.js';
 import { scoreCompanions, bestOf, overallVerdict, dotColor } from './scoring.js';
-import { analyzeGrowth } from './growth.js';
+import { analyzeGrowth, findConflicts } from './growth.js';
 import { esc, emptyState, exampleState, stateToCore, buildInputForm, syncInputUI } from './input.js';
 import { renderResult } from './result.js';
 
@@ -17,7 +17,8 @@ export function computeModel(core, rules, data) {
   const best = bestOf(scored);
   const growth = analyzeGrowth(c, best.type, rules);
   const verdict = overallVerdict(c, best, growth.label, rules);
-  return { validation: v, core: c, scored, best, growth, verdict, dot: (s) => dotColor(s, rules) };
+  const conflicts = findConflicts(c, best.type, rules);
+  return { validation: v, core: c, scored, best, growth, verdict, conflicts, dot: (s) => dotColor(s, rules) };
 }
 
 const FILTER_KEY = 'protocore-fit:leads';

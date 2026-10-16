@@ -57,6 +57,11 @@
     "hpFlat":   { "initMin": 800, "initMax": 1200, "stepMin": 400,  "stepMax": 600,  "cap": 4200, "grid": 600 }
   },
 
+  "conflicts": [
+    { "a": ["hpPct", "hpFlat"], "b": ["defPct", "defFlat"], "aLabel": "生命", "bLabel": "防禦",
+      "why": "已查到的搭檔倍率都是「攻擊＋防禦」「攻擊＋生命」或只有攻擊，沒有搭檔同時吃生命和防禦" }
+  ],
+
   "fallbackGrids": { "base": 2, "perHit": 1, "_doc": "備用：查不到 1 格是多少的詞條（grid 填 null）時，初始一條算 2 格、每強化一次＋1 格。目前所有詞條都有範圍，沒用到" },
 
   "scoring": {
