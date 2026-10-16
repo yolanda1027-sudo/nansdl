@@ -1,0 +1,26 @@
+# 芯核適配度檢查器
+
+《戀與深空》芯核的升／留／拆判斷工具。規格見 [docs/spec.md](docs/spec.md)。
+
+## 結構
+
+| 路徑 | 內容 |
+| --- | --- |
+| `data/rules.json` | 主副詞條範圍、格數、權重、強化中間值、門檻（規格書第 2、5、6、7 節）。調權重只改這裡 |
+| `data/companions.json` | 27 個搭檔：`type`（atk／def／hp／unknown）、`basis`（型別怎麼判定的）、`evidence`（公式）、`source`（來源網址） |
+| `src/validate.js`、`src/scoring.js`、`src/growth.js` | 純函式，不碰畫面 |
+| `src/input.js`、`src/result.js`、`src/app.js`、`src/page.html` | 畫面 |
+| `tests/` | `npm test`，含規格書範例芯核 |
+| `scripts/build.js` | `npm run build` → `dist/index.html`（單一檔案，JSON 內嵌） |
+
+`dist/index.html` 是給 artifact 發布用的，沒有 `<!doctype>` 外框。
+
+## 搭檔型別查核結果（2026-10-16）
+
+- 攻擊型 16：逐光騎士、深空獵人、遙遠少年、Evol 特警、九黎司命、黎明抹殺者、臨空醫生、極地軍醫、赤霄武神、深海潛行者、藝術家、海妖魅影、無盡掠奪者、異界來客、終極兵器 X-02、深空飛行員
+- 防禦型 5：光獵、永恆先知、利莫里亞海神、銀翼惡魔、遠空執艦官
+- 生命型 5：暗蝕國王、終末之神、潮汐之神、深淵主宰、冥羅之主
+- 待查 1：畫壇新銳
+
+查核限制：雲端環境連不到 wiki.biligame.com，BWIKI 內容是透過網路搜尋讀到的；BWIKI 搜不到的頁面改用英文 wiki。
+藝術家、銀翼惡魔沒查到誓約技倍率，是用其他技能推定（`basis: other-skills`）。
