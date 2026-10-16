@@ -2,11 +2,17 @@
 
 export const TYPES = ['atk', 'def', 'hp'];
 
-// 步驟 1：副詞條換算成格數
+// 步驟 1：副詞條換算成格數。查不到 1 格是多少的詞條（誓約增傷）用「2＋強化次數」推估
 export function gridsOf(sub, rules) {
   const r = rules.substats[sub.stat];
   if (!r || sub.current == null) return 0;
+  if (r.grid == null) return rules.fallbackGrids.base + rules.fallbackGrids.perHit * (sub.hits || 0);
   return sub.current / r.grid;
+}
+
+export function gridsEstimated(stat, rules) {
+  const r = rules.substats[stat];
+  return !!r && r.grid == null;
 }
 
 // 步驟 2＋4 前半：副詞條比＝Σ(格數×權重)／Σ格數
@@ -19,7 +25,7 @@ export function subRatio(subs, type, build, rules) {
     const weight = w[sub.stat] ?? 0;
     sumGrid += grids;
     sumWeighted += grids * weight;
-    return { stat: sub.stat, grids, weight, weighted: grids * weight };
+    return { stat: sub.stat, grids, weight, weighted: grids * weight, estimated: gridsEstimated(sub.stat, rules) };
   });
   return { ratio: sumGrid > 0 ? sumWeighted / sumGrid : 0, rows, sumGrid, sumWeighted };
 }

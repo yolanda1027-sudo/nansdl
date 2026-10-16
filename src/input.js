@@ -1,4 +1,5 @@
 // 輸入區畫面：建立表單、把畫面狀態轉成 core、依驗證結果標紅。
+import { plausibleRange } from './validate.js';
 
 const SUB_ROWS = 4;
 
@@ -33,7 +34,7 @@ export function emptyState(build) {
     level: 0,
     main: null,
     build: build || 'crit',
-    subs: Array.from({ length: SUB_ROWS }, () => ({ stat: '', initial: '', current: '' })),
+    subs: Array.from({ length: SUB_ROWS }, () => ({ stat: '', hits: 0, current: '' })),
     isExample: false,
   };
 }
@@ -48,10 +49,10 @@ export function exampleState() {
     main: 'critRate',
     build: 'crit',
     subs: [
-      { stat: 'critDmg', initial: '2.5', current: '5.2' },
-      { stat: 'atkPct', initial: '8', current: '8' },
-      { stat: 'critRate', initial: '1.2', current: '2.0' },
-      { stat: 'hpFlat', initial: '900', current: '900' },
+      { stat: 'critDmg', hits: 2, current: '5.2' },
+      { stat: 'atkPct', hits: 0, current: '8' },
+      { stat: 'critRate', hits: 1, current: '2.0' },
+      { stat: 'hpFlat', hits: 0, current: '900' },
     ],
     isExample: true,
   };
@@ -71,11 +72,12 @@ export function stateToCore(state) {
     level: state.level,
     main: state.main,
     build: state.build,
-    subs: state.subs.map((s) => ({ stat: s.stat, initial: toNum(s.initial), current: toNum(s.current) })),
+    subs: state.subs.map((s) => ({ stat: s.stat, hits: s.hits | 0, current: toNum(s.current) })),
   };
 }
 
 export function buildInputForm(root, rules) {
+  const hitOpts = Array.from({ length: rules.maxHitsPerSub + 1 }, (_, h) => `<option value="${h}">${h === 0 ? '0' : '×' + h}</option>`).join('');
   const slotBtns = Object.entries(rules.slots)
     .map(([k, s]) => `
       <button type="button" class="slot-btn" id="slot-${k}" data-slot="${k}" role="radio" aria-checked="false">
@@ -102,7 +104,7 @@ export function buildInputForm(root, rules) {
   const subRows = Array.from({ length: SUB_ROWS }, (_, i) => `
       <div class="sub-row" data-row="${i}">
         <select id="sub-stat-${i}" aria-label="第 ${i + 1} 條副詞條"></select>
-        <input id="sub-init-${i}" inputmode="decimal" autocomplete="off" aria-label="第 ${i + 1} 條初始數值">
+        <select id="sub-hits-${i}" class="hits" aria-label="第 ${i + 1} 條被強化幾次（黃色數字）">${hitOpts}</select>
         <input id="sub-cur-${i}" inputmode="decimal" autocomplete="off" aria-label="第 ${i + 1} 條目前數值">
       </div>
       <div class="sub-msg" id="sub-msg-${i}" hidden></div>`)
@@ -143,8 +145,8 @@ export function buildInputForm(root, rules) {
       <div class="field-msg" id="msg-main" hidden></div>
     </div>
     <div class="field">
-      <div class="label">副詞條 <span class="opt">初始＝0 級時的數值，沒記下來可以留空</span></div>
-      <div class="subs-head" aria-hidden="true"><span>詞條</span><span>初始</span><span>目前</span></div>
+      <div class="label">副詞條 <span class="opt">強化＝詞條旁的黃色數字，沒有就是 0</span></div>
+      <div class="subs-head" aria-hidden="true"><span>詞條</span><span>強化</span><span>數值</span></div>
       ${subRows}
       <div class="field-msg" id="msg-subs" hidden></div>
     </div>`;
@@ -210,7 +212,8 @@ export function syncInputUI(root, state, rules, check, showErrors) {
   showMsg(root.querySelector('#msg-rarity'), fieldErr('rarity')?.msg);
   showMsg(root.querySelector('#msg-level'), fieldErr('level')?.msg);
   showMsg(root.querySelector('#msg-main'), fieldErr('main')?.msg);
-  showMsg(root.querySelector('#msg-subs'), fieldErr('subs')?.msg);
+  const hitsWarn = check.warnings.find((w) => w.field === 'hits' && w.row == null);
+  showMsg(root.querySelector('#msg-subs'), fieldErr('subs')?.msg || hitsWarn?.msg);
   mainSel.classList.toggle('bad', !!fieldErr('main'));
 
   // check.core.subs 會拿掉空白列，所以要把畫面列號對回去
@@ -220,16 +223,15 @@ export function syncInputUI(root, state, rules, check, showErrors) {
   state.subs.forEach((sub, i) => {
     const sel = root.querySelector(`#sub-stat-${i}`);
     fillSelect(sel, rules.subOptions, sub.stat, rules, '—');
-    const init = root.querySelector(`#sub-init-${i}`);
+    const hits = root.querySelector(`#sub-hits-${i}`);
     const cur = root.querySelector(`#sub-cur-${i}`);
-    if (document.activeElement !== init) init.value = sub.initial;
+    hits.value = String(sub.hits | 0);
     if (document.activeElement !== cur) cur.value = sub.current;
-    const r = rules.substats[sub.stat];
     const unit = sub.stat ? rules.stats[sub.stat].unit : '';
-    init.placeholder = r ? `${r.initMin}–${r.initMax}${unit}` : '選填';
-    cur.placeholder = r ? `最多 ${r.cap}${unit}` : '';
-    init.disabled = cur.disabled = !sub.stat;
-    [sel, init, cur].forEach((el) => el.classList.remove('bad', 'flag'));
+    const range = sub.stat ? plausibleRange(sub.stat, sub.hits | 0, rules) : null;
+    cur.placeholder = range ? `約 ${+range.min.toFixed(2)}–${+range.max.toFixed(2)}${unit}` : sub.stat ? '目前數值' : '';
+    hits.disabled = cur.disabled = !sub.stat;
+    [sel, hits, cur].forEach((el) => el.classList.remove('bad'));
 
     const coreRow = rowMap.indexOf(i);
     const msgs = [];
@@ -237,15 +239,11 @@ export function syncInputUI(root, state, rules, check, showErrors) {
       const own = (list) => list.filter((e) => e.row === coreRow);
       for (const e of own(errs)) {
         msgs.push({ kind: 'bad', text: e.msg });
-        (e.field === 'current' ? cur : sel).classList.add('bad');
+        (({ hits, current: cur })[e.field] || sel).classList.add('bad');
       }
       for (const w of own(check.warnings)) {
         msgs.push({ kind: 'bad', text: w.msg });
-        ({ initial: init, current: cur, stat: sel })[w.field]?.classList.add('bad');
-      }
-      for (const f of own(check.flags)) {
-        msgs.push({ kind: 'flag', text: `${f.msg}，不是打錯` });
-        init.classList.add('flag');
+        ({ hits, current: cur, stat: sel })[w.field]?.classList.add('bad');
       }
     }
     const box = root.querySelector(`#sub-msg-${i}`);

@@ -39,35 +39,40 @@
 
   "upgradeEvery": 3,
   "maxSubstats": 4,
-  "subOptions": ["critRate", "critDmg", "weakDmg", "atkPct", "defPct", "hpPct", "atkFlat", "defFlat", "hpFlat"],
+  "maxHitsPerSub": 7,
+  "_maxHitsDoc": "一條副詞條最多被強化幾次：+15 的 5 次＋天生 2 條時 0 級補償的 2 次",
+  "subOptions": ["critRate", "critDmg", "weakDmg", "oathDmg", "atkPct", "defPct", "hpPct", "atkFlat", "defFlat", "hpFlat"],
 
   "substats": {
-    "_doc": "SSR 副詞條。initMin/initMax＝初始值範圍；stepMin/stepMax＝每次強化範圍；cap＝理論上限；grid＝評分用的 1 格（單次強化最大值）；mid＝長歪判定用的單次強化中間值",
-    "critRate": { "initMin": 1.1, "initMax": 1.6,  "stepMin": 0.55, "stepMax": 0.8,  "cap": 5.6,  "grid": 0.8, "mid": 0.675 },
-    "critDmg":  { "initMin": 2.2, "initMax": 3.2,  "stepMin": 1.1,  "stepMax": 1.6,  "cap": 11.2, "grid": 1.6, "mid": 1.35 },
-    "weakDmg":  { "initMin": 1.8, "initMax": 2.6,  "stepMin": 0.9,  "stepMax": 1.3,  "cap": 9.1,  "grid": 1.3, "mid": 1.1 },
+    "_doc": "SSR 副詞條。initMin/initMax＝初始值範圍；stepMin/stepMax＝每次強化範圍；cap＝理論上限；grid＝評分用的 1 格（單次強化最大值）。強化次數直接用遊戲裡詞條旁的黃色數字，不再從數值反推",
+    "critRate": { "initMin": 1.1, "initMax": 1.6,  "stepMin": 0.55, "stepMax": 0.8,  "cap": 5.6,  "grid": 0.8 },
+    "critDmg":  { "initMin": 2.2, "initMax": 3.2,  "stepMin": 1.1,  "stepMax": 1.6,  "cap": 11.2, "grid": 1.6 },
+    "weakDmg":  { "initMin": 1.8, "initMax": 2.6,  "stepMin": 0.9,  "stepMax": 1.3,  "cap": 9.1,  "grid": 1.3 },
     "atkPct":   { "initMin": 7,   "initMax": 10,   "stepMin": 3.5,  "stepMax": 5,    "cap": 35,   "grid": 5,   "mid": 4.25 },
     "defPct":   { "initMin": 7,   "initMax": 10,   "stepMin": 3.5,  "stepMax": 5,    "cap": 35,   "grid": 5,   "mid": 4.25 },
     "hpPct":    { "initMin": 7,   "initMax": 10,   "stepMin": 3.5,  "stepMax": 5,    "cap": 35,   "grid": 5,   "mid": 4.25 },
     "atkFlat":  { "initMin": 40,  "initMax": 60,   "stepMin": 20,   "stepMax": 30,   "cap": 210,  "grid": 30,  "mid": 25 },
     "defFlat":  { "initMin": 20,  "initMax": 30,   "stepMin": 10,   "stepMax": 15,   "cap": 105,  "grid": 15,  "mid": 12.5 },
-    "hpFlat":   { "initMin": 800, "initMax": 1200, "stepMin": 400,  "stepMax": 600,  "cap": 4200, "grid": 600, "mid": 500 }
+    "oathDmg":  { "initMin": null, "initMax": null, "stepMin": null, "stepMax": null, "cap": null, "grid": null, "_note": "誓約增傷當副詞條的數值範圍還沒查到；格數改用「2＋強化次數」推估，也不檢查數值範圍" },
+    "hpFlat":   { "initMin": 800, "initMax": 1200, "stepMin": 400,  "stepMax": 600,  "cap": 4200, "grid": 600 }
   },
+
+  "fallbackGrids": { "base": 2, "perHit": 1, "_doc": "查不到 1 格是多少的詞條：初始一條算 2 格，每強化一次＋1 格（規格書第 5 節的換算）" },
 
   "scoring": {
     "mainShare": 0.35,
     "subShare": 0.65,
-    "_weightsDoc": "副詞條權重：weights[流派][搭檔型別][詞條]。第一版估值，待真實芯核校準。",
+    "_weightsDoc": "副詞條權重：weights[流派][搭檔型別][詞條]。第一版估值，待真實芯核校準。誓約增傷 0.5 是暫定值（只加誓約技一招）。",
     "weights": {
       "crit": {
-        "atk": { "critRate": 1.0, "critDmg": 1.0, "weakDmg": 0.6, "atkPct": 0.8, "defPct": 0,   "hpPct": 0,   "atkFlat": 0.4, "defFlat": 0,   "hpFlat": 0 },
-        "def": { "critRate": 1.0, "critDmg": 1.0, "weakDmg": 0.6, "atkPct": 0.4, "defPct": 0.8, "hpPct": 0,   "atkFlat": 0.2, "defFlat": 0.4, "hpFlat": 0 },
-        "hp":  { "critRate": 1.0, "critDmg": 1.0, "weakDmg": 0.6, "atkPct": 0.4, "defPct": 0,   "hpPct": 0.8, "atkFlat": 0.2, "defFlat": 0,   "hpFlat": 0.4 }
+        "atk": { "critRate": 1.0, "critDmg": 1.0, "weakDmg": 0.6, "oathDmg": 0.5, "atkPct": 0.8, "defPct": 0,   "hpPct": 0,   "atkFlat": 0.4, "defFlat": 0,   "hpFlat": 0 },
+        "def": { "critRate": 1.0, "critDmg": 1.0, "weakDmg": 0.6, "oathDmg": 0.5, "atkPct": 0.4, "defPct": 0.8, "hpPct": 0,   "atkFlat": 0.2, "defFlat": 0.4, "hpFlat": 0 },
+        "hp":  { "critRate": 1.0, "critDmg": 1.0, "weakDmg": 0.6, "oathDmg": 0.5, "atkPct": 0.4, "defPct": 0,   "hpPct": 0.8, "atkFlat": 0.2, "defFlat": 0,   "hpFlat": 0.4 }
       },
       "weak": {
-        "atk": { "critRate": 0.3, "critDmg": 0.3, "weakDmg": 1.0, "atkPct": 0.8, "defPct": 0,   "hpPct": 0,   "atkFlat": 0.4, "defFlat": 0,   "hpFlat": 0 },
-        "def": { "critRate": 0.3, "critDmg": 0.3, "weakDmg": 1.0, "atkPct": 0.4, "defPct": 0.8, "hpPct": 0,   "atkFlat": 0.2, "defFlat": 0.4, "hpFlat": 0 },
-        "hp":  { "critRate": 0.3, "critDmg": 0.3, "weakDmg": 1.0, "atkPct": 0.4, "defPct": 0,   "hpPct": 0.8, "atkFlat": 0.2, "defFlat": 0,   "hpFlat": 0.4 }
+        "atk": { "critRate": 0.3, "critDmg": 0.3, "weakDmg": 1.0, "oathDmg": 0.5, "atkPct": 0.8, "defPct": 0,   "hpPct": 0,   "atkFlat": 0.4, "defFlat": 0,   "hpFlat": 0 },
+        "def": { "critRate": 0.3, "critDmg": 0.3, "weakDmg": 1.0, "oathDmg": 0.5, "atkPct": 0.4, "defPct": 0.8, "hpPct": 0,   "atkFlat": 0.2, "defFlat": 0.4, "hpFlat": 0 },
+        "hp":  { "critRate": 0.3, "critDmg": 0.3, "weakDmg": 1.0, "oathDmg": 0.5, "atkPct": 0.4, "defPct": 0,   "hpPct": 0.8, "atkFlat": 0.2, "defFlat": 0,   "hpFlat": 0.4 }
       }
     },
     "_mainDoc": "主詞條分數（只算 β、δ）。fixed 裡的詞條直接給分；typedPct 是「對應型別的加成」；otherPct 是不對應的加成。δ 虛弱流的暴擊／暴傷 0.3 是沿用副詞條權重的假設，規格書沒寫。",
@@ -88,11 +93,12 @@
 
   "growth": {
     "goodWeight": 0.8,
+    "_labelDoc": "長歪判定的分母是所有強化次數加總（黃色數字加總，含 0 級補償強化）",
     "_ratioDoc": "比例用分子／分母存，避免 2/3 寫成小數時的進位誤差",
     "greatRatio": { "num": 2, "den": 3 },
     "badRatio": { "num": 1, "den": 3 },
     "labels": {
-      "notStarted": { "text": "還沒開始長", "advice": "看初始詞條就好，先升到 +3 看第一次強化" },
+      "notStarted": { "text": "還沒開始長", "advice": "還沒有任何強化，先升到 +3 看第一次強化" },
       "great":      { "text": "長得很好",   "advice": "值得繼續升" },
       "normal":     { "text": "普通",       "advice": "看適配分決定" },
       "bad":        { "text": "長歪了",     "advice": "停手，考慮拆掉回收芯核能量" }

@@ -106,23 +106,25 @@ export function boot() {
   form.addEventListener('change', (e) => {
     const id = e.target.id;
     if (id === 'main-stat') state.main = e.target.value || null;
+    const h = id.match(/^sub-hits-(\d)$/);
+    if (h) state.subs[+h[1]].hits = parseInt(e.target.value, 10) || 0;
     const m = id.match(/^sub-stat-(\d)$/);
     if (m) {
       const row = state.subs[+m[1]];
       row.stat = e.target.value;
-      if (!row.stat) { row.initial = ''; row.current = ''; }
+      if (!row.stat) { row.hits = 0; row.current = ''; }
     }
     edited();
   });
 
   form.addEventListener('input', (e) => {
-    const m = e.target.id.match(/^sub-(init|cur)-(\d)$/);
+    const m = e.target.id.match(/^sub-cur-(\d)$/);
     if (!m) return;
-    state.subs[+m[2]][m[1] === 'init' ? 'initial' : 'current'] = e.target.value;
+    state.subs[+m[1]].current = e.target.value;
     state.isExample = false;
   });
   form.addEventListener('focusout', (e) => {
-    if (/^sub-(init|cur)-\d$/.test(e.target.id)) sync();
+    if (/^sub-cur-\d$/.test(e.target.id)) sync();
   });
 
   document.querySelectorAll('.build-btn').forEach((b) =>

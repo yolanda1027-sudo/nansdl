@@ -61,8 +61,8 @@ function renderGrowth(model, rules, esc) {
     .map((r) => `<li class="${r.good ? 'good' : ''}"><span>${esc(rules.stats[r.stat].label)}</span><b class="num">×${r.hits}</b></li>`)
     .join('');
   const notes = [];
-  if (g.estimated) notes.push('有副詞條沒填初始數值，強化次數是用目前數值推估的。');
-  if (model.core.rarity === 'SR') notes.push('紫芯核的副詞條範圍還沒查到，強化次數只能參考。');
+  if (g.bonusHits > 0) notes.push(`其中 ${g.bonusHits} 次是 0 級補償強化（天生 2、3 條副詞條的金芯核，0 級就會先送）。`);
+  if (model.core.rarity === 'SR') notes.push('紫芯核的副詞條數值範圍還沒查到，先不檢查數值。');
   if (g.premiumSeed) notes.push('天生只有 2 條，而且都是好詞條，之後每次強化都會落在它們身上。');
   return `
     <section class="card growth" aria-labelledby="g-title">
@@ -71,13 +71,13 @@ function renderGrowth(model, rules, esc) {
         <span class="pill g-${g.label}">${esc(g.labelText)}</span>
       </div>
       <div class="g-stats">
-        <div><span class="num">${g.n}</span><span>已強化</span></div>
+        <div><span class="num">${g.totalHits}</span><span>已強化</span></div>
         <div><span class="num">${g.goodHits}</span><span>落在好詞條</span></div>
         <div><span class="num">${g.left}</span><span>還能再長</span></div>
       </div>
       <p class="g-advice">${esc(g.advice)}。${esc(g.forecast)}。</p>
       <ul class="g-rows" aria-label="每條副詞條被強化的次數">${rows}</ul>
-      <p class="hint">粉色＝對「${esc(TYPE_LABEL[model.best.type])}」有用的好詞條${g.estimated ? ' · 含推估' : ''}</p>
+      <p class="hint">粉色＝對「${esc(TYPE_LABEL[model.best.type])}」有用的好詞條；×N＝遊戲裡的黃色數字</p>
       ${notes.map((t) => `<p class="hint">${esc(t)}</p>`).join('')}
     </section>`;
 }
@@ -88,7 +88,7 @@ function renderWhy(item, model, rules, esc) {
     .map((row) => {
       const verdict = row.weight >= rules.growth.goodWeight ? '加分' : row.weight > 0 ? '小加分' : '沒用';
       const cls = row.weight >= rules.growth.goodWeight ? 'w-good' : row.weight > 0 ? 'w-some' : 'w-none';
-      return `<tr class="${cls}"><td>${esc(rules.stats[row.stat].label)}</td><td class="num">${fmt(row.grids)} 格</td><td class="num">×${row.weight}</td><td>${verdict}</td></tr>`;
+      return `<tr class="${cls}"><td>${esc(rules.stats[row.stat].label)}</td><td class="num">${fmt(row.grids)} 格${row.estimated ? '<small>推估</small>' : ''}</td><td class="num">×${row.weight}</td><td>${verdict}</td></tr>`;
     })
     .join('');
   const main = r.main == null

@@ -5,7 +5,7 @@ const load = (p) => JSON.parse(readFileSync(new URL(`../data/${p}`, import.meta.
 export const rules = load('rules.json');
 export const companionsData = load('companions.json');
 
-// 規格書的範例芯核
+// 規格書的範例芯核（強化次數＝遊戲裡的黃色數字）
 export const exampleCore = () => ({
   slot: 'delta',
   rarity: 'SSR',
@@ -13,9 +13,23 @@ export const exampleCore = () => ({
   main: 'critRate',
   build: 'crit',
   subs: [
-    { stat: 'critDmg', initial: 2.5, current: 5.2 },
-    { stat: 'atkPct', initial: 8, current: 8 },
-    { stat: 'critRate', initial: 1.2, current: 2.0 },
-    { stat: 'hpFlat', initial: 900, current: 900 },
+    { stat: 'critDmg', hits: 2, current: 5.2 },
+    { stat: 'atkPct', hits: 0, current: 8 },
+    { stat: 'critRate', hits: 1, current: 2.0 },
+    { stat: 'hpFlat', hits: 0, current: 900 },
+  ],
+});
+
+// 使用者截圖的粉珀 β 芯核（+0，誓約增傷帶 1 次 0 級補償強化）
+export const screenshotCore = () => ({
+  slot: 'beta',
+  rarity: 'SSR',
+  level: 0,
+  main: 'defPct',
+  build: 'crit',
+  subs: [
+    { stat: 'atkFlat', hits: 0, current: 53 },
+    { stat: 'oathDmg', hits: 1, current: 1.4 },
+    { stat: 'weakDmg', hits: 0, current: 2.4 },
   ],
 });

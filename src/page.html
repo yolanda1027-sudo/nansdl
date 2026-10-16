@@ -60,6 +60,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -138,14 +139,14 @@ input { font-family: var(--font-display); font-variant-numeric: tabular-nums; fo
 input::placeholder { font-family: var(--font-body); font-weight: 400; color: var(--muted); font-size: 13px; }
 select:disabled, input:disabled { background: var(--muted-soft); color: var(--muted); }
 .bad { border-color: var(--bad) !important; background: var(--bad-soft); }
-.flag { border-color: var(--lav); }
 .main-fixed { height: 44px; display: flex; align-items: center; padding: 0 12px; border-radius: var(--radius-sm); background: var(--surface-2); font-weight: 500; }
 
-.subs-head, .sub-row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.subs-head, .sub-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1.1fr); gap: 8px; }
 .subs-head span { font-size: 12px; color: var(--ink-soft); padding-left: 4px; }
 .sub-msg { display: grid; gap: 2px; font-size: 12.5px; margin-top: -2px; }
 .m-bad { color: var(--bad); }
-.m-flag { color: var(--lav); }
+.hits { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.why td small { font-size: 11px; color: var(--warn); margin-left: 4px; font-family: var(--font-body); }
 
 /* 結果 */
 .result-empty { text-align: center; color: var(--ink-soft); font-size: 14px; padding: 26px 12px; border: 2px dashed var(--line); border-radius: var(--radius-lg); }

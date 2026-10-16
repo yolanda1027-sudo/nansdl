@@ -64,6 +64,17 @@ test('overallVerdict：分數門檻與長歪降級', () => {
   assert.equal(overallVerdict(base({ rarity: 'R' }), null, 'great', rules).text, '拆');
 });
 
+test('gridsOf：誓約增傷查不到 1 格，用 2＋強化次數推估', () => {
+  assert.equal(gridsOf({ stat: 'oathDmg', hits: 1, current: 1.4 }, rules), 3);
+  assert.equal(gridsOf({ stat: 'oathDmg', hits: 0, current: 0.9 }, rules), 2);
+});
+
+test('scoreForType：截圖芯核（β 防禦加成）防禦型 57、攻擊型 40', async () => {
+  const { screenshotCore } = await import('./helpers.js');
+  assert.equal(scoreForType(screenshotCore(), 'def', rules).score, 57);
+  assert.equal(scoreForType(screenshotCore(), 'atk', rules).score, 40);
+});
+
 test('dotColor：綠 ≥75、黃 55–74、灰 <55', () => {
   assert.equal(dotColor(75, rules), 'green');
   assert.equal(dotColor(74, rules), 'yellow');

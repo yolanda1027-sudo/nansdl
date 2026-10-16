@@ -60,6 +60,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg);
   color: var(--ink);
@@ -138,14 +139,14 @@ input { font-family: var(--font-display); font-variant-numeric: tabular-nums; fo
 input::placeholder { font-family: var(--font-body); font-weight: 400; color: var(--muted); font-size: 13px; }
 select:disabled, input:disabled { background: var(--muted-soft); color: var(--muted); }
 .bad { border-color: var(--bad) !important; background: var(--bad-soft); }
-.flag { border-color: var(--lav); }
 .main-fixed { height: 44px; display: flex; align-items: center; padding: 0 12px; border-radius: var(--radius-sm); background: var(--surface-2); font-weight: 500; }
 
-.subs-head, .sub-row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.subs-head, .sub-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 1.1fr); gap: 8px; }
 .subs-head span { font-size: 12px; color: var(--ink-soft); padding-left: 4px; }
 .sub-msg { display: grid; gap: 2px; font-size: 12.5px; margin-top: -2px; }
 .m-bad { color: var(--bad); }
-.m-flag { color: var(--lav); }
+.hits { font-family: var(--font-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.why td small { font-size: 11px; color: var(--warn); margin-left: 4px; font-family: var(--font-body); }
 
 /* 結果 */
 .result-empty { text-align: center; color: var(--ink-soft); font-size: 14px; padding: 26px 12px; border: 2px dashed var(--line); border-radius: var(--radius-lg); }
@@ -277,7 +278,7 @@ select:disabled, input:disabled { background: var(--muted-soft); color: var(--mu
   </div>
 </div>
 
-<script type="application/json" id="rules-data">{"version":1,"_doc":"芯核適配度檢查器的所有數字。對應 docs/spec.md 第 2 節（芯核系統規則）、第 5 節（評分規則）、第 6 節（長歪判定）、第 7 節（結果門檻）。改權重或門檻只要改這裡，不用動程式。","stats":{"critRate":{"label":"暴擊","unit":"%"},"critDmg":{"label":"暴傷","unit":"%"},"weakDmg":{"label":"虛弱增傷","unit":"%"},"atkPct":{"label":"攻擊加成","unit":"%"},"defPct":{"label":"防禦加成","unit":"%"},"hpPct":{"label":"生命加成","unit":"%"},"atkFlat":{"label":"攻擊","unit":""},"defFlat":{"label":"防禦","unit":""},"hpFlat":{"label":"生命","unit":""},"energyRegen":{"label":"加速回能","unit":"%"},"oathEnergy":{"label":"誓約回能","unit":"%"},"oathDmg":{"label":"誓約增傷","unit":"%"}},"rarities":{"SSR":{"label":"金 SSR","maxLevel":15,"scored":true,"scoreMultiplier":1,"tag":null},"SR":{"label":"紫 SR","maxLevel":12,"scored":true,"scoreMultiplier":0.6,"tag":"過渡用"},"R":{"label":"藍 R","maxLevel":9,"scored":false,"scoreMultiplier":0,"tag":"直接拆"}},"slots":{"alpha":{"symbol":"α","nick":"錐子","card":"日冕卡","mainOptions":["hpFlat"],"mainFixed":"hpFlat"},"beta":{"symbol":"β","nick":"方塊","card":"日冕卡","mainOptions":["atkPct","defPct","hpPct","oathEnergy","oathDmg","energyRegen"],"mainFixed":null},"gamma":{"symbol":"γ","nick":"海膽","card":"月暉卡","mainOptions":["atkFlat"],"mainFixed":"atkFlat"},"delta":{"symbol":"δ","nick":"三角","card":"月暉卡","mainOptions":["atkPct","defPct","hpPct","critRate","critDmg","weakDmg"],"mainFixed":null}},"mainStatAt15":{"_doc":"SSR 主詞條 +15 參考值（只用來顯示，不參與計算）","hpFlat":3000,"atkFlat":200,"energyRegen":24,"oathDmg":14,"critRate":11.2,"weakDmg":18.2},"stellactra":["綠珥","藍弧","紫輝","黃璃","紅漪","粉珀"],"upgradeEvery":3,"maxSubstats":4,"subOptions":["critRate","critDmg","weakDmg","atkPct","defPct","hpPct","atkFlat","defFlat","hpFlat"],"substats":{"_doc":"SSR 副詞條。initMin/initMax＝初始值範圍；stepMin/stepMax＝每次強化範圍；cap＝理論上限；grid＝評分用的 1 格（單次強化最大值）；mid＝長歪判定用的單次強化中間值","critRate":{"initMin":1.1,"initMax":1.6,"stepMin":0.55,"stepMax":0.8,"cap":5.6,"grid":0.8,"mid":0.675},"critDmg":{"initMin":2.2,"initMax":3.2,"stepMin":1.1,"stepMax":1.6,"cap":11.2,"grid":1.6,"mid":1.35},"weakDmg":{"initMin":1.8,"initMax":2.6,"stepMin":0.9,"stepMax":1.3,"cap":9.1,"grid":1.3,"mid":1.1},"atkPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"defPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"hpPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"atkFlat":{"initMin":40,"initMax":60,"stepMin":20,"stepMax":30,"cap":210,"grid":30,"mid":25},"defFlat":{"initMin":20,"initMax":30,"stepMin":10,"stepMax":15,"cap":105,"grid":15,"mid":12.5},"hpFlat":{"initMin":800,"initMax":1200,"stepMin":400,"stepMax":600,"cap":4200,"grid":600,"mid":500}},"scoring":{"mainShare":0.35,"subShare":0.65,"_weightsDoc":"副詞條權重：weights[流派][搭檔型別][詞條]。第一版估值，待真實芯核校準。","weights":{"crit":{"atk":{"critRate":1,"critDmg":1,"weakDmg":0.6,"atkPct":0.8,"defPct":0,"hpPct":0,"atkFlat":0.4,"defFlat":0,"hpFlat":0},"def":{"critRate":1,"critDmg":1,"weakDmg":0.6,"atkPct":0.4,"defPct":0.8,"hpPct":0,"atkFlat":0.2,"defFlat":0.4,"hpFlat":0},"hp":{"critRate":1,"critDmg":1,"weakDmg":0.6,"atkPct":0.4,"defPct":0,"hpPct":0.8,"atkFlat":0.2,"defFlat":0,"hpFlat":0.4}},"weak":{"atk":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"atkPct":0.8,"defPct":0,"hpPct":0,"atkFlat":0.4,"defFlat":0,"hpFlat":0},"def":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"atkPct":0.4,"defPct":0.8,"hpPct":0,"atkFlat":0.2,"defFlat":0.4,"hpFlat":0},"hp":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"atkPct":0.4,"defPct":0,"hpPct":0.8,"atkFlat":0.2,"defFlat":0,"hpFlat":0.4}}},"_mainDoc":"主詞條分數（只算 β、δ）。fixed 裡的詞條直接給分；typedPct 是「對應型別的加成」；otherPct 是不對應的加成。δ 虛弱流的暴擊／暴傷 0.3 是沿用副詞條權重的假設，規格書沒寫。","main":{"beta":{"crit":{"fixed":{"energyRegen":1,"oathEnergy":1,"oathDmg":1},"typedPct":0.8,"otherPct":0.2},"weak":{"fixed":{"energyRegen":1,"oathEnergy":1,"oathDmg":1},"typedPct":0.8,"otherPct":0.2}},"delta":{"crit":{"fixed":{"critRate":1,"critDmg":1,"weakDmg":0.8},"typedPct":0.8,"otherPct":0.2},"weak":{"fixed":{"weakDmg":1,"critRate":0.3,"critDmg":0.3},"typedPct":0.8,"otherPct":0.2}}},"typePct":{"atk":"atkPct","def":"defPct","hp":"hpPct"},"_unknownDoc":"型別待查的搭檔：三種型別都算，取最低分當保守值，而且不參加「最適合的搭檔」評選","unknownTypePolicy":"min"},"growth":{"goodWeight":0.8,"_ratioDoc":"比例用分子／分母存，避免 2/3 寫成小數時的進位誤差","greatRatio":{"num":2,"den":3},"badRatio":{"num":1,"den":3},"labels":{"notStarted":{"text":"還沒開始長","advice":"看初始詞條就好，先升到 +3 看第一次強化"},"great":{"text":"長得很好","advice":"值得繼續升"},"normal":{"text":"普通","advice":"看適配分決定"},"bad":{"text":"長歪了","advice":"停手，考慮拆掉回收芯核能量"}}},"verdict":{"keepMin":75,"holdMin":55,"texts":{"keep":"留，升滿","hold":"先留著","scrap":"拆"}},"dots":{"greenMin":75,"yellowMin":55}}</script>
+<script type="application/json" id="rules-data">{"version":1,"_doc":"芯核適配度檢查器的所有數字。對應 docs/spec.md 第 2 節（芯核系統規則）、第 5 節（評分規則）、第 6 節（長歪判定）、第 7 節（結果門檻）。改權重或門檻只要改這裡，不用動程式。","stats":{"critRate":{"label":"暴擊","unit":"%"},"critDmg":{"label":"暴傷","unit":"%"},"weakDmg":{"label":"虛弱增傷","unit":"%"},"atkPct":{"label":"攻擊加成","unit":"%"},"defPct":{"label":"防禦加成","unit":"%"},"hpPct":{"label":"生命加成","unit":"%"},"atkFlat":{"label":"攻擊","unit":""},"defFlat":{"label":"防禦","unit":""},"hpFlat":{"label":"生命","unit":""},"energyRegen":{"label":"加速回能","unit":"%"},"oathEnergy":{"label":"誓約回能","unit":"%"},"oathDmg":{"label":"誓約增傷","unit":"%"}},"rarities":{"SSR":{"label":"金 SSR","maxLevel":15,"scored":true,"scoreMultiplier":1,"tag":null},"SR":{"label":"紫 SR","maxLevel":12,"scored":true,"scoreMultiplier":0.6,"tag":"過渡用"},"R":{"label":"藍 R","maxLevel":9,"scored":false,"scoreMultiplier":0,"tag":"直接拆"}},"slots":{"alpha":{"symbol":"α","nick":"錐子","card":"日冕卡","mainOptions":["hpFlat"],"mainFixed":"hpFlat"},"beta":{"symbol":"β","nick":"方塊","card":"日冕卡","mainOptions":["atkPct","defPct","hpPct","oathEnergy","oathDmg","energyRegen"],"mainFixed":null},"gamma":{"symbol":"γ","nick":"海膽","card":"月暉卡","mainOptions":["atkFlat"],"mainFixed":"atkFlat"},"delta":{"symbol":"δ","nick":"三角","card":"月暉卡","mainOptions":["atkPct","defPct","hpPct","critRate","critDmg","weakDmg"],"mainFixed":null}},"mainStatAt15":{"_doc":"SSR 主詞條 +15 參考值（只用來顯示，不參與計算）","hpFlat":3000,"atkFlat":200,"energyRegen":24,"oathDmg":14,"critRate":11.2,"weakDmg":18.2},"stellactra":["綠珥","藍弧","紫輝","黃璃","紅漪","粉珀"],"upgradeEvery":3,"maxSubstats":4,"maxHitsPerSub":7,"_maxHitsDoc":"一條副詞條最多被強化幾次：+15 的 5 次＋天生 2 條時 0 級補償的 2 次","subOptions":["critRate","critDmg","weakDmg","oathDmg","atkPct","defPct","hpPct","atkFlat","defFlat","hpFlat"],"substats":{"_doc":"SSR 副詞條。initMin/initMax＝初始值範圍；stepMin/stepMax＝每次強化範圍；cap＝理論上限；grid＝評分用的 1 格（單次強化最大值）。強化次數直接用遊戲裡詞條旁的黃色數字，不再從數值反推","critRate":{"initMin":1.1,"initMax":1.6,"stepMin":0.55,"stepMax":0.8,"cap":5.6,"grid":0.8},"critDmg":{"initMin":2.2,"initMax":3.2,"stepMin":1.1,"stepMax":1.6,"cap":11.2,"grid":1.6},"weakDmg":{"initMin":1.8,"initMax":2.6,"stepMin":0.9,"stepMax":1.3,"cap":9.1,"grid":1.3},"atkPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"defPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"hpPct":{"initMin":7,"initMax":10,"stepMin":3.5,"stepMax":5,"cap":35,"grid":5,"mid":4.25},"atkFlat":{"initMin":40,"initMax":60,"stepMin":20,"stepMax":30,"cap":210,"grid":30,"mid":25},"defFlat":{"initMin":20,"initMax":30,"stepMin":10,"stepMax":15,"cap":105,"grid":15,"mid":12.5},"oathDmg":{"initMin":null,"initMax":null,"stepMin":null,"stepMax":null,"cap":null,"grid":null,"_note":"誓約增傷當副詞條的數值範圍還沒查到；格數改用「2＋強化次數」推估，也不檢查數值範圍"},"hpFlat":{"initMin":800,"initMax":1200,"stepMin":400,"stepMax":600,"cap":4200,"grid":600}},"fallbackGrids":{"base":2,"perHit":1,"_doc":"查不到 1 格是多少的詞條：初始一條算 2 格，每強化一次＋1 格（規格書第 5 節的換算）"},"scoring":{"mainShare":0.35,"subShare":0.65,"_weightsDoc":"副詞條權重：weights[流派][搭檔型別][詞條]。第一版估值，待真實芯核校準。誓約增傷 0.5 是暫定值（只加誓約技一招）。","weights":{"crit":{"atk":{"critRate":1,"critDmg":1,"weakDmg":0.6,"oathDmg":0.5,"atkPct":0.8,"defPct":0,"hpPct":0,"atkFlat":0.4,"defFlat":0,"hpFlat":0},"def":{"critRate":1,"critDmg":1,"weakDmg":0.6,"oathDmg":0.5,"atkPct":0.4,"defPct":0.8,"hpPct":0,"atkFlat":0.2,"defFlat":0.4,"hpFlat":0},"hp":{"critRate":1,"critDmg":1,"weakDmg":0.6,"oathDmg":0.5,"atkPct":0.4,"defPct":0,"hpPct":0.8,"atkFlat":0.2,"defFlat":0,"hpFlat":0.4}},"weak":{"atk":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"oathDmg":0.5,"atkPct":0.8,"defPct":0,"hpPct":0,"atkFlat":0.4,"defFlat":0,"hpFlat":0},"def":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"oathDmg":0.5,"atkPct":0.4,"defPct":0.8,"hpPct":0,"atkFlat":0.2,"defFlat":0.4,"hpFlat":0},"hp":{"critRate":0.3,"critDmg":0.3,"weakDmg":1,"oathDmg":0.5,"atkPct":0.4,"defPct":0,"hpPct":0.8,"atkFlat":0.2,"defFlat":0,"hpFlat":0.4}}},"_mainDoc":"主詞條分數（只算 β、δ）。fixed 裡的詞條直接給分；typedPct 是「對應型別的加成」；otherPct 是不對應的加成。δ 虛弱流的暴擊／暴傷 0.3 是沿用副詞條權重的假設，規格書沒寫。","main":{"beta":{"crit":{"fixed":{"energyRegen":1,"oathEnergy":1,"oathDmg":1},"typedPct":0.8,"otherPct":0.2},"weak":{"fixed":{"energyRegen":1,"oathEnergy":1,"oathDmg":1},"typedPct":0.8,"otherPct":0.2}},"delta":{"crit":{"fixed":{"critRate":1,"critDmg":1,"weakDmg":0.8},"typedPct":0.8,"otherPct":0.2},"weak":{"fixed":{"weakDmg":1,"critRate":0.3,"critDmg":0.3},"typedPct":0.8,"otherPct":0.2}}},"typePct":{"atk":"atkPct","def":"defPct","hp":"hpPct"},"_unknownDoc":"型別待查的搭檔：三種型別都算，取最低分當保守值，而且不參加「最適合的搭檔」評選","unknownTypePolicy":"min"},"growth":{"goodWeight":0.8,"_labelDoc":"長歪判定的分母是所有強化次數加總（黃色數字加總，含 0 級補償強化）","_ratioDoc":"比例用分子／分母存，避免 2/3 寫成小數時的進位誤差","greatRatio":{"num":2,"den":3},"badRatio":{"num":1,"den":3},"labels":{"notStarted":{"text":"還沒開始長","advice":"還沒有任何強化，先升到 +3 看第一次強化"},"great":{"text":"長得很好","advice":"值得繼續升"},"normal":{"text":"普通","advice":"看適配分決定"},"bad":{"text":"長歪了","advice":"停手，考慮拆掉回收芯核能量"}}},"verdict":{"keepMin":75,"holdMin":55,"texts":{"keep":"留，升滿","hold":"先留著","scrap":"拆"}},"dots":{"greenMin":75,"yellowMin":55}}</script>
 <script type="application/json" id="companions-data">{"version":1,"checkedAt":"2026-10-16","_doc":"27 個搭檔身份。type 只能是 atk／def／hp／unknown。verified＝人工核對過遊戲或 BWIKI 原頁；basis 說明型別是怎麼判定的。aliases 留給台服譯名（還沒填）。","_basisDoc":{"spec":"規格書已核對","bwiki-oath":"BWIKI 誓約技公式（BWIKI 被這個環境的網路政策擋住，是透過網路搜尋讀到頁面內容）","enwiki-oath":"英文 wiki 誓約技公式（BWIKI 搜不到這一頁）","other-skills":"誓約技倍率沒查到，用同一搭檔的其他技能公式推定","none":"查不到"},"leads":[{"id":"xavier","name":"沈星回"},{"id":"zayne","name":"黎深"},{"id":"rafayel","name":"祁煜"},{"id":"sylus","name":"秦徹"},{"id":"caleb","name":"夏以晝"}],"companions":[{"id":"xavier-lumiere","lead":"xavier","name":"光獵","nameEn":"Lumiere","aliases":[],"type":"def","verified":true,"basis":"spec","evidence":"誓約技：1440+780%攻擊力+3060%防禦力","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E:%E6%90%AD%E6%A1%A3/%E5%85%89%E7%8C%8E"},{"id":"xavier-king-of-darknight","lead":"xavier","name":"暗蝕國王","nameEn":"King of Darknight","aliases":[],"type":"hp","verified":false,"basis":"bwiki-oath","evidence":"誓約技：1800+960%攻擊力+86%最大生命值","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E/%E6%90%AD%E6%A1%A3/%E6%9A%97%E8%9A%80%E5%9B%BD%E7%8E%8B"},{"id":"xavier-lightseeker","lead":"xavier","name":"逐光騎士","nameEn":"Lightseeker","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Galactic Pulse：1440+1920% ATK","source":"https://loveanddeepspace.wiki.gg/wiki/Xavier:_Lightseeker"},{"id":"xavier-deepspace-hunter","lead":"xavier","name":"深空獵人","nameEn":"Deepspace Hunter","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「星爆」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E:%E6%90%AD%E6%A1%A3/%E6%B7%B1%E7%A9%BA%E7%8C%8E%E4%BA%BA"},{"id":"xavier-distant-youth","lead":"xavier","name":"遙遠少年","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「星願」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E:%E6%90%AD%E6%A1%A3/%E9%81%A5%E8%BF%9C%E5%B0%91%E5%B9%B4"},{"id":"xavier-evol-police","lead":"xavier","name":"Evol 特警","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「光源共振」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E6%B2%88%E6%98%9F%E5%9B%9E/%E6%90%AD%E6%A1%A3/Evol%E7%89%B9%E8%AD%A6"},{"id":"zayne-foreseer","lead":"zayne","name":"永恆先知","nameEn":"Foreseer","aliases":[],"type":"def","verified":true,"basis":"spec","evidence":"誓約技「冰之牢」：1440+780%攻擊力+3060%防禦力","source":"https://wiki.biligame.com/lysk/%E9%BB%8E%E6%B7%B1:%E6%90%AD%E6%A1%A3/%E6%B0%B8%E6%81%92%E5%85%88%E7%9F%A5"},{"id":"zayne-god-of-annihilation","lead":"zayne","name":"終末之神","nameEn":"God of Annihilation","aliases":[],"type":"hp","verified":false,"basis":"bwiki-oath","evidence":"誓約技：1800+960%攻擊力+86%最大生命值（英文 wiki 同數字；另一次搜尋讀到 1262+674%攻擊力+60.6%最大生命值，都是生命型）","source":"https://wiki.biligame.com/lysk/%E9%BB%8E%E6%B7%B1/%E6%90%AD%E6%A1%A3/%E7%BB%88%E6%9C%AB%E4%B9%8B%E7%A5%9E"},{"id":"zayne-master-of-fate","lead":"zayne","name":"九黎司命","nameEn":"Master of Fate","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「篁山蘊靈」：1440+1920%攻擊力","source":"https://wiki.biligame.com/lysk/%E9%BB%8E%E6%B7%B1:%E6%90%AD%E6%A1%A3/%E4%B9%9D%E9%BB%8E%E5%8F%B8%E5%91%BD"},{"id":"zayne-dawnbreaker","lead":"zayne","name":"黎明抹殺者","nameEn":"Dawnbreaker","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Chilling Blossom（徹骨之華）：1200+1600% ATK","source":"https://loveanddeepspace.miraheze.org/wiki/Zayne:_Dawnbreaker"},{"id":"zayne-linkon-doctor","lead":"zayne","name":"臨空醫生","nameEn":"Linkon Doctor","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Hoarfrost Saber（雪之刃）：1200+1600% ATK","source":"https://loveanddeepspace.miraheze.org/wiki/Zayne:_Linkon_Doctor"},{"id":"zayne-medic-of-the-arctic","lead":"zayne","name":"極地軍醫","nameEn":"Medic of the Arctic","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Relentless Snow（極地冰壑）：1200+1600% ATK","source":"https://loveanddeepspace.miraheze.org/wiki/Zayne:_Medic_of_the_Arctic"},{"id":"rafayel-vermilion-martial-god","lead":"rafayel","name":"赤霄武神","nameEn":"Vermilion Martial God","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Ashen Tempest：1800+2400% ATK","source":"https://loveanddeepspace.wiki.gg/wiki/Rafayel:_Vermilion_Martial_God"},{"id":"rafayel-lemurian-sea-god","lead":"rafayel","name":"利莫里亞海神","nameEn":"Lemurian Sea God","aliases":[],"type":"def","verified":false,"basis":"bwiki-oath","evidence":"誓約技「鑄浪永契」：1800+960%攻擊力+3820%防禦力","source":"https://wiki.biligame.com/lysk/%E7%A5%81%E7%85%9C:%E6%90%AD%E6%A1%A3/%E5%88%A9%E8%8E%AB%E9%87%8C%E4%BA%9A%E6%B5%B7%E7%A5%9E"},{"id":"rafayel-god-of-the-tides","lead":"rafayel","name":"潮汐之神","nameEn":"God of the Tides","aliases":[],"type":"hp","verified":false,"basis":"bwiki-oath","evidence":"誓約技「四海潮生」：1440+780%攻擊力+69.4%最大生命值","source":"https://wiki.biligame.com/lysk/%E7%A5%81%E7%85%9C:%E6%90%AD%E6%A1%A3/%E6%BD%AE%E6%B1%90%E4%B9%8B%E7%A5%9E"},{"id":"rafayel-abysswalker","lead":"rafayel","name":"深海潛行者","nameEn":"Abysswalker","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技：1440+1920%攻擊力","source":"https://wiki.biligame.com/lysk/%E7%A5%81%E7%85%9C:%E6%90%AD%E6%A1%A3/%E6%B7%B1%E6%B5%B7%E6%BD%9C%E8%A1%8C%E8%80%85"},{"id":"rafayel-fresh-paint","lead":"rafayel","name":"畫壇新銳","nameEn":"Fresh Paint","aliases":[],"type":"unknown","verified":false,"basis":"none","evidence":"BWIKI 與英文 wiki 都沒搜到技能頁，只確認這個搭檔存在","source":"https://loveanddeepspace.wiki.gg/wiki/Rafayel"},{"id":"rafayel-artist","lead":"rafayel","name":"藝術家","nameEn":"Artist","aliases":[],"type":"atk","verified":false,"basis":"other-skills","evidence":"誓約技 Searing Motif 依合計攻擊力計算（倍率沒查到）；攻略站標示 scaling on ATK","source":"https://lads-battles.vercel.app/en/characters/rafayel/artist"},{"id":"rafayel-phantom-of-the-siren","lead":"rafayel","name":"海妖魅影","nameEn":"Phantom of the Siren","aliases":[],"type":"atk","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Sonata of Reunions：1200+1600% ATK","source":"https://loveanddeepspace.miraheze.org/wiki/Rafayel:_Phantom_of_the_Siren"},{"id":"sylus-abyss-sovereign","lead":"sylus","name":"深淵主宰","nameEn":"","aliases":[],"type":"hp","verified":true,"basis":"spec","evidence":"誓約技「無厭之瞳」：1440+780%攻擊力+69.4%最大生命值","source":"https://wiki.biligame.com/lysk/%E7%A7%A6%E5%BD%BB:%E6%90%AD%E6%A1%A3/%E6%B7%B1%E6%B8%8A%E4%B8%BB%E5%AE%B0"},{"id":"sylus-silverwing-fiend","lead":"sylus","name":"銀翼惡魔","nameEn":"Silverwing Fiend","aliases":[],"type":"def","verified":false,"basis":"other-skills","evidence":"誓約技「血夜終章」倍率沒查到；協助技 584+311% ATK+1244% DEF、共鳴技 1663+887% ATK+3515% DEF，玩家攻略也稱 DEF scale","source":"https://loveanddeepspace.wiki.gg/wiki/Sylus:_Silverwing_Fiend"},{"id":"sylus-endless-raider","lead":"sylus","name":"無盡掠奪者","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「末日審判」：1440+1920%攻擊力","source":"https://wiki.biligame.com/lysk/%E7%A7%A6%E5%BD%BB:%E6%90%AD%E6%A1%A3/%E6%97%A0%E5%B0%BD%E6%8E%A0%E5%A4%BA%E8%80%85"},{"id":"sylus-otherworldly-visitor","lead":"sylus","name":"異界來客","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「震鳴衝擊」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E7%A7%A6%E5%BD%BB:%E6%90%AD%E6%A1%A3/%E5%BC%82%E7%95%8C%E6%9D%A5%E5%AE%A2"},{"id":"caleb-netherlord","lead":"caleb","name":"冥羅之主","nameEn":"Netherlord","aliases":[],"type":"hp","verified":false,"basis":"enwiki-oath","evidence":"誓約技 Fate Unforgotten：1800+960% ATK+86% Max HP","source":"https://loveanddeepspace.wiki.gg/wiki/Caleb:_Netherlord"},{"id":"caleb-ultimate-weapon-x02","lead":"caleb","name":"終極兵器 X-02","nameEn":"Ultimate Weapon X-02","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「同頻覺醒」期間的同頻攻擊：380+500%攻擊力","source":"https://wiki.biligame.com/lysk/%E5%A4%8F%E4%BB%A5%E6%98%BC:%E6%90%AD%E6%A1%A3/%E7%BB%88%E6%9E%81%E5%85%B5%E5%99%A8X-02"},{"id":"caleb-farspace-colonel","lead":"caleb","name":"遠空執艦官","nameEn":"","aliases":[],"type":"def","verified":false,"basis":"bwiki-oath","evidence":"誓約技「全程封鎖」：1440+780%攻擊力+3060%防禦力","source":"https://wiki.biligame.com/lysk/%E5%A4%8F%E4%BB%A5%E6%98%BC:%E6%90%AD%E6%A1%A3/%E8%BF%9C%E7%A9%BA%E6%89%A7%E8%88%B0%E5%AE%98"},{"id":"caleb-deepspace-pilot","lead":"caleb","name":"深空飛行員","nameEn":"","aliases":[],"type":"atk","verified":false,"basis":"bwiki-oath","evidence":"誓約技「合圍行動」：1200+1600%攻擊力","source":"https://wiki.biligame.com/lysk/%E5%A4%8F%E4%BB%A5%E6%98%BC:%E6%90%AD%E6%A1%A3/%E6%B7%B1%E7%A9%BA%E9%A3%9E%E8%A1%8C%E5%91%98"}]}</script>
 <script>
 (() => {
@@ -285,8 +286,8 @@ select:disabled, input:disabled { background: var(--muted-soft); color: var(--mu
 // ---- src/validate.js ----
 // 輸入驗證：只吃資料、吐結果，不碰畫面。
 // core 形狀：
-// { slot, rarity, stellactrum, level, main, build, subs: [{ stat, initial, current }] }
-// initial 可以是 null（沒記下來）；current 必填。
+// { slot, rarity, stellactrum, level, main, build, subs: [{ stat, hits, current }] }
+// hits＝遊戲裡副詞條旁的黃色數字（被強化幾次，含 0 級補償強化；沒有數字就是 0）
 
 const OUT_OF_RANGE = '這個數值不太可能出現，要不要再看一次？';
 
@@ -302,7 +303,7 @@ function normalizeCore(core, rules) {
     .filter((s) => s && s.stat)
     .map((s) => ({
       stat: s.stat,
-      initial: isNum(s.initial) ? s.initial : null,
+      hits: Number.isInteger(s.hits) && s.hits > 0 ? s.hits : 0,
       current: isNum(s.current) ? s.current : null,
     }));
   return {
@@ -316,28 +317,29 @@ function normalizeCore(core, rules) {
   };
 }
 
-// 單一副詞條數值檢查（只有 SSR 有範圍資料）
-// 回傳 { initial: 'ok'|'compensated'|'out', current: 'ok'|'out' }
+// 依強化次數推算這條副詞條「合理的數值範圍」；查不到範圍的詞條回傳 null
+function plausibleRange(stat, hits, rules) {
+  const r = rules.substats[stat];
+  if (!r || r.initMin == null) return null;
+  return {
+    min: r.initMin + hits * r.stepMin,
+    max: Math.min(r.cap, r.initMax + hits * r.stepMax),
+  };
+}
+
+// 單一副詞條數值檢查（只有 SSR 有範圍資料）：'ok'｜'out'｜'unknown'
 function checkSubValue(sub, rarity, rules) {
-  const r = rules.substats[sub.stat];
-  const res = { initial: 'ok', current: 'ok' };
-  if (rarity !== 'SSR' || !r) return res;
-  if (sub.initial != null) {
-    if (sub.initial < r.initMin || sub.initial > r.cap) res.initial = 'out';
-    else if (sub.initial > r.initMax) res.initial = 'compensated';
-  }
-  if (sub.current != null) {
-    if (sub.current < r.initMin || sub.current > r.cap) res.current = 'out';
-    else if (sub.initial != null && sub.current < sub.initial) res.current = 'out';
-  }
-  return res;
+  if (rarity !== 'SSR' || sub.current == null) return 'ok';
+  const range = plausibleRange(sub.stat, sub.hits, rules);
+  if (!range) return 'unknown';
+  const eps = 1e-9;
+  return sub.current < range.min - eps || sub.current > range.max + eps ? 'out' : 'ok';
 }
 
 function validateCore(rawCore, rules) {
   const core = normalizeCore(rawCore, rules);
   const errors = [];
   const warnings = [];
-  const flags = [];
 
   const slot = rules.slots[core.slot];
   if (!slot) errors.push({ field: 'slot', msg: '先選一個槽位' });
@@ -375,18 +377,28 @@ function validateCore(rawCore, rules) {
     if (core.main && sub.stat === core.main) {
       warnings.push({ field: 'stat', row, msg: '副詞條和主詞條一樣，要不要再看一次？' });
     }
+    if (sub.hits > rules.maxHitsPerSub) {
+      errors.push({ field: 'hits', row, msg: `強化次數最多 ${rules.maxHitsPerSub}` });
+    }
     if (sub.current == null) {
       errors.push({ field: 'current', row, msg: '要填目前數值' });
     }
-    const check = checkSubValue(sub, core.rarity, rules);
-    if (check.initial === 'out') warnings.push({ field: 'initial', row, msg: OUT_OF_RANGE });
-    if (check.initial === 'compensated') {
-      flags.push({ row, kind: 'compensated', msg: '含 0 級補償強化' });
+    if (checkSubValue(sub, core.rarity, rules) === 'out') {
+      warnings.push({ field: 'current', row, msg: OUT_OF_RANGE });
     }
-    if (check.current === 'out') warnings.push({ field: 'current', row, msg: OUT_OF_RANGE });
   });
 
-  return { ok: errors.length === 0, core, errors, warnings, flags };
+  // 強化次數加總應該≈等級推出來的次數（多出來的是 0 級補償，最多 2 次；
+  // 天生 3 條的芯核 +3 可能是新增第 4 條，所以可以少 1 次）
+  if (rarity && core.subs.length > 0) {
+    const n = Math.floor(core.level / rules.upgradeEvery);
+    const total = core.subs.reduce((a, s) => a + s.hits, 0);
+    if (total > n + 2 || total < n - 1) {
+      warnings.push({ field: 'hits', msg: `黃色數字加起來是 ${total}，+${core.level} 通常是 ${Math.max(0, n - 1)}～${n + 2}，要不要再看一次？` });
+    }
+  }
+
+  return { ok: errors.length === 0, core, errors, warnings };
 }
 
 // ---- src/scoring.js ----
@@ -394,11 +406,17 @@ function validateCore(rawCore, rules) {
 
 const TYPES = ['atk', 'def', 'hp'];
 
-// 步驟 1：副詞條換算成格數
+// 步驟 1：副詞條換算成格數。查不到 1 格是多少的詞條（誓約增傷）用「2＋強化次數」推估
 function gridsOf(sub, rules) {
   const r = rules.substats[sub.stat];
   if (!r || sub.current == null) return 0;
+  if (r.grid == null) return rules.fallbackGrids.base + rules.fallbackGrids.perHit * (sub.hits || 0);
   return sub.current / r.grid;
+}
+
+function gridsEstimated(stat, rules) {
+  const r = rules.substats[stat];
+  return !!r && r.grid == null;
 }
 
 // 步驟 2＋4 前半：副詞條比＝Σ(格數×權重)／Σ格數
@@ -411,7 +429,7 @@ function subRatio(subs, type, build, rules) {
     const weight = w[sub.stat] ?? 0;
     sumGrid += grids;
     sumWeighted += grids * weight;
-    return { stat: sub.stat, grids, weight, weighted: grids * weight };
+    return { stat: sub.stat, grids, weight, weighted: grids * weight, estimated: gridsEstimated(sub.stat, rules) };
   });
   return { ratio: sumGrid > 0 ? sumWeighted / sumGrid : 0, rows, sumGrid, sumWeighted };
 }
@@ -496,8 +514,9 @@ function overallVerdict(core, best, growthLabel, rules) {
 
 // ---- src/growth.js ----
 // 長歪判定：只吃資料、吐結果，不碰畫面。
+// 強化次數直接用遊戲裡副詞條旁的黃色數字（sub.hits），不再從數值反推。
 
-// 已發生的強化次數 n＝目前等級 ÷ 3 取整數
+// 依等級推出來的強化次數 n＝目前等級 ÷ 3 取整數
 function upgradesSoFar(level, rules) {
   return Math.floor(level / rules.upgradeEvery);
 }
@@ -508,28 +527,19 @@ function upgradesLeft(level, rarityKey, rules) {
   return Math.max(0, Math.floor((max - level) / rules.upgradeEvery));
 }
 
-// 每條副詞條被強化幾次。初始留空時用初始中間值推估。
-function subHits(sub, rules) {
-  const r = rules.substats[sub.stat];
-  if (!r || sub.current == null) return { hits: 0, estimated: false };
-  if (sub.initial != null) {
-    return { hits: Math.max(0, Math.round((sub.current - sub.initial) / r.mid)), estimated: false };
-  }
-  const initMid = (r.initMin + r.initMax) / 2;
-  return { hits: Math.max(0, Math.round((sub.current - initMid) / r.mid)), estimated: true };
-}
-
 // 好詞條＝對指定型別權重 ≥ goodWeight 的詞條
 function goodStatsFor(type, build, rules) {
   const w = rules.scoring.weights[build][type];
   return Object.keys(w).filter((k) => w[k] >= rules.growth.goodWeight);
 }
 
-function growthLabel(n, goodHits, rules) {
-  if (n === 0) return 'notStarted';
+// n＝等級推出來的強化次數；total＝黃色數字加總（含 0 級補償強化）
+// 還沒升到 +3 一律算「還沒開始長」，0 級補償只是初始抽到的
+function growthLabel(n, total, goodHits, rules) {
+  if (n === 0 || total === 0) return 'notStarted';
   const { greatRatio: g, badRatio: b } = rules.growth;
-  if (goodHits * g.den >= n * g.num) return 'great';
-  if (goodHits * b.den <= n * b.num) return 'bad';
+  if (goodHits * g.den >= total * g.num) return 'great';
+  if (goodHits * b.den <= total * b.num) return 'bad';
   return 'normal';
 }
 
@@ -542,16 +552,10 @@ function joinOr(labels) {
 function analyzeGrowth(core, type, rules) {
   const n = upgradesSoFar(core.level, rules);
   const good = new Set(goodStatsFor(type, core.build, rules));
-  const rows = core.subs.map((sub) => ({
-    stat: sub.stat,
-    good: good.has(sub.stat),
-    ...subHits(sub, rules),
-  }));
-  const estimated = rows.some((r) => r.estimated);
+  const rows = core.subs.map((sub) => ({ stat: sub.stat, good: good.has(sub.stat), hits: sub.hits }));
   const totalHits = rows.reduce((a, r) => a + r.hits, 0);
-  // 推估時可能把 0 級補償強化也算進去，好強化次數最多算到 n
-  const goodHits = Math.min(n, rows.filter((r) => r.good).reduce((a, r) => a + r.hits, 0));
-  const label = growthLabel(n, goodHits, rules);
+  const goodHits = rows.filter((r) => r.good).reduce((a, r) => a + r.hits, 0);
+  const label = growthLabel(n, totalHits, goodHits, rules);
 
   const left = rules.rarities[core.rarity] ? upgradesLeft(core.level, core.rarity, rules) : 0;
   const goodRows = rows.filter((r) => r.good);
@@ -563,14 +567,13 @@ function analyzeGrowth(core, type, rules) {
   else if (goodRows.length === 0) forecast = `還能再長 ${left} 次，但現有副詞條都不是這個搭檔要的`;
   else forecast = `還能再長 ${left} 次，每次大約 ${Math.round(prob * 100)}% 會長在${joinOr(goodLabels)}上`;
 
-  const premiumSeed =
-    core.rarity === 'SSR' && rows.length === 2 && rows.every((r) => r.good);
+  const premiumSeed = core.rarity === 'SSR' && rows.length === 2 && rows.every((r) => r.good);
 
   return {
     n,
     totalHits,
+    bonusHits: Math.max(0, totalHits - n),
     goodHits,
-    estimated,
     label,
     labelText: rules.growth.labels[label].text,
     advice: rules.growth.labels[label].advice,
@@ -618,7 +621,7 @@ function emptyState(build) {
     level: 0,
     main: null,
     build: build || 'crit',
-    subs: Array.from({ length: SUB_ROWS }, () => ({ stat: '', initial: '', current: '' })),
+    subs: Array.from({ length: SUB_ROWS }, () => ({ stat: '', hits: 0, current: '' })),
     isExample: false,
   };
 }
@@ -633,10 +636,10 @@ function exampleState() {
     main: 'critRate',
     build: 'crit',
     subs: [
-      { stat: 'critDmg', initial: '2.5', current: '5.2' },
-      { stat: 'atkPct', initial: '8', current: '8' },
-      { stat: 'critRate', initial: '1.2', current: '2.0' },
-      { stat: 'hpFlat', initial: '900', current: '900' },
+      { stat: 'critDmg', hits: 2, current: '5.2' },
+      { stat: 'atkPct', hits: 0, current: '8' },
+      { stat: 'critRate', hits: 1, current: '2.0' },
+      { stat: 'hpFlat', hits: 0, current: '900' },
     ],
     isExample: true,
   };
@@ -656,11 +659,12 @@ function stateToCore(state) {
     level: state.level,
     main: state.main,
     build: state.build,
-    subs: state.subs.map((s) => ({ stat: s.stat, initial: toNum(s.initial), current: toNum(s.current) })),
+    subs: state.subs.map((s) => ({ stat: s.stat, hits: s.hits | 0, current: toNum(s.current) })),
   };
 }
 
 function buildInputForm(root, rules) {
+  const hitOpts = Array.from({ length: rules.maxHitsPerSub + 1 }, (_, h) => `<option value="${h}">${h === 0 ? '0' : '×' + h}</option>`).join('');
   const slotBtns = Object.entries(rules.slots)
     .map(([k, s]) => `
       <button type="button" class="slot-btn" id="slot-${k}" data-slot="${k}" role="radio" aria-checked="false">
@@ -687,7 +691,7 @@ function buildInputForm(root, rules) {
   const subRows = Array.from({ length: SUB_ROWS }, (_, i) => `
       <div class="sub-row" data-row="${i}">
         <select id="sub-stat-${i}" aria-label="第 ${i + 1} 條副詞條"></select>
-        <input id="sub-init-${i}" inputmode="decimal" autocomplete="off" aria-label="第 ${i + 1} 條初始數值">
+        <select id="sub-hits-${i}" class="hits" aria-label="第 ${i + 1} 條被強化幾次（黃色數字）">${hitOpts}</select>
         <input id="sub-cur-${i}" inputmode="decimal" autocomplete="off" aria-label="第 ${i + 1} 條目前數值">
       </div>
       <div class="sub-msg" id="sub-msg-${i}" hidden></div>`)
@@ -728,8 +732,8 @@ function buildInputForm(root, rules) {
       <div class="field-msg" id="msg-main" hidden></div>
     </div>
     <div class="field">
-      <div class="label">副詞條 <span class="opt">初始＝0 級時的數值，沒記下來可以留空</span></div>
-      <div class="subs-head" aria-hidden="true"><span>詞條</span><span>初始</span><span>目前</span></div>
+      <div class="label">副詞條 <span class="opt">強化＝詞條旁的黃色數字，沒有就是 0</span></div>
+      <div class="subs-head" aria-hidden="true"><span>詞條</span><span>強化</span><span>數值</span></div>
       ${subRows}
       <div class="field-msg" id="msg-subs" hidden></div>
     </div>`;
@@ -795,7 +799,8 @@ function syncInputUI(root, state, rules, check, showErrors) {
   showMsg(root.querySelector('#msg-rarity'), fieldErr('rarity')?.msg);
   showMsg(root.querySelector('#msg-level'), fieldErr('level')?.msg);
   showMsg(root.querySelector('#msg-main'), fieldErr('main')?.msg);
-  showMsg(root.querySelector('#msg-subs'), fieldErr('subs')?.msg);
+  const hitsWarn = check.warnings.find((w) => w.field === 'hits' && w.row == null);
+  showMsg(root.querySelector('#msg-subs'), fieldErr('subs')?.msg || hitsWarn?.msg);
   mainSel.classList.toggle('bad', !!fieldErr('main'));
 
   // check.core.subs 會拿掉空白列，所以要把畫面列號對回去
@@ -805,16 +810,15 @@ function syncInputUI(root, state, rules, check, showErrors) {
   state.subs.forEach((sub, i) => {
     const sel = root.querySelector(`#sub-stat-${i}`);
     fillSelect(sel, rules.subOptions, sub.stat, rules, '—');
-    const init = root.querySelector(`#sub-init-${i}`);
+    const hits = root.querySelector(`#sub-hits-${i}`);
     const cur = root.querySelector(`#sub-cur-${i}`);
-    if (document.activeElement !== init) init.value = sub.initial;
+    hits.value = String(sub.hits | 0);
     if (document.activeElement !== cur) cur.value = sub.current;
-    const r = rules.substats[sub.stat];
     const unit = sub.stat ? rules.stats[sub.stat].unit : '';
-    init.placeholder = r ? `${r.initMin}–${r.initMax}${unit}` : '選填';
-    cur.placeholder = r ? `最多 ${r.cap}${unit}` : '';
-    init.disabled = cur.disabled = !sub.stat;
-    [sel, init, cur].forEach((el) => el.classList.remove('bad', 'flag'));
+    const range = sub.stat ? plausibleRange(sub.stat, sub.hits | 0, rules) : null;
+    cur.placeholder = range ? `約 ${+range.min.toFixed(2)}–${+range.max.toFixed(2)}${unit}` : sub.stat ? '目前數值' : '';
+    hits.disabled = cur.disabled = !sub.stat;
+    [sel, hits, cur].forEach((el) => el.classList.remove('bad'));
 
     const coreRow = rowMap.indexOf(i);
     const msgs = [];
@@ -822,15 +826,11 @@ function syncInputUI(root, state, rules, check, showErrors) {
       const own = (list) => list.filter((e) => e.row === coreRow);
       for (const e of own(errs)) {
         msgs.push({ kind: 'bad', text: e.msg });
-        (e.field === 'current' ? cur : sel).classList.add('bad');
+        (({ hits, current: cur })[e.field] || sel).classList.add('bad');
       }
       for (const w of own(check.warnings)) {
         msgs.push({ kind: 'bad', text: w.msg });
-        ({ initial: init, current: cur, stat: sel })[w.field]?.classList.add('bad');
-      }
-      for (const f of own(check.flags)) {
-        msgs.push({ kind: 'flag', text: `${f.msg}，不是打錯` });
-        init.classList.add('flag');
+        ({ hits, current: cur, stat: sel })[w.field]?.classList.add('bad');
       }
     }
     const box = root.querySelector(`#sub-msg-${i}`);
@@ -903,8 +903,8 @@ function renderGrowth(model, rules, esc) {
     .map((r) => `<li class="${r.good ? 'good' : ''}"><span>${esc(rules.stats[r.stat].label)}</span><b class="num">×${r.hits}</b></li>`)
     .join('');
   const notes = [];
-  if (g.estimated) notes.push('有副詞條沒填初始數值，強化次數是用目前數值推估的。');
-  if (model.core.rarity === 'SR') notes.push('紫芯核的副詞條範圍還沒查到，強化次數只能參考。');
+  if (g.bonusHits > 0) notes.push(`其中 ${g.bonusHits} 次是 0 級補償強化（天生 2、3 條副詞條的金芯核，0 級就會先送）。`);
+  if (model.core.rarity === 'SR') notes.push('紫芯核的副詞條數值範圍還沒查到，先不檢查數值。');
   if (g.premiumSeed) notes.push('天生只有 2 條，而且都是好詞條，之後每次強化都會落在它們身上。');
   return `
     <section class="card growth" aria-labelledby="g-title">
@@ -913,13 +913,13 @@ function renderGrowth(model, rules, esc) {
         <span class="pill g-${g.label}">${esc(g.labelText)}</span>
       </div>
       <div class="g-stats">
-        <div><span class="num">${g.n}</span><span>已強化</span></div>
+        <div><span class="num">${g.totalHits}</span><span>已強化</span></div>
         <div><span class="num">${g.goodHits}</span><span>落在好詞條</span></div>
         <div><span class="num">${g.left}</span><span>還能再長</span></div>
       </div>
       <p class="g-advice">${esc(g.advice)}。${esc(g.forecast)}。</p>
       <ul class="g-rows" aria-label="每條副詞條被強化的次數">${rows}</ul>
-      <p class="hint">粉色＝對「${esc(TYPE_LABEL[model.best.type])}」有用的好詞條${g.estimated ? ' · 含推估' : ''}</p>
+      <p class="hint">粉色＝對「${esc(TYPE_LABEL[model.best.type])}」有用的好詞條；×N＝遊戲裡的黃色數字</p>
       ${notes.map((t) => `<p class="hint">${esc(t)}</p>`).join('')}
     </section>`;
 }
@@ -930,7 +930,7 @@ function renderWhy(item, model, rules, esc) {
     .map((row) => {
       const verdict = row.weight >= rules.growth.goodWeight ? '加分' : row.weight > 0 ? '小加分' : '沒用';
       const cls = row.weight >= rules.growth.goodWeight ? 'w-good' : row.weight > 0 ? 'w-some' : 'w-none';
-      return `<tr class="${cls}"><td>${esc(rules.stats[row.stat].label)}</td><td class="num">${fmt(row.grids)} 格</td><td class="num">×${row.weight}</td><td>${verdict}</td></tr>`;
+      return `<tr class="${cls}"><td>${esc(rules.stats[row.stat].label)}</td><td class="num">${fmt(row.grids)} 格${row.estimated ? '<small>推估</small>' : ''}</td><td class="num">×${row.weight}</td><td>${verdict}</td></tr>`;
     })
     .join('');
   const main = r.main == null
@@ -1104,23 +1104,25 @@ function boot() {
   form.addEventListener('change', (e) => {
     const id = e.target.id;
     if (id === 'main-stat') state.main = e.target.value || null;
+    const h = id.match(/^sub-hits-(\d)$/);
+    if (h) state.subs[+h[1]].hits = parseInt(e.target.value, 10) || 0;
     const m = id.match(/^sub-stat-(\d)$/);
     if (m) {
       const row = state.subs[+m[1]];
       row.stat = e.target.value;
-      if (!row.stat) { row.initial = ''; row.current = ''; }
+      if (!row.stat) { row.hits = 0; row.current = ''; }
     }
     edited();
   });
 
   form.addEventListener('input', (e) => {
-    const m = e.target.id.match(/^sub-(init|cur)-(\d)$/);
+    const m = e.target.id.match(/^sub-cur-(\d)$/);
     if (!m) return;
-    state.subs[+m[2]][m[1] === 'init' ? 'initial' : 'current'] = e.target.value;
+    state.subs[+m[1]].current = e.target.value;
     state.isExample = false;
   });
   form.addEventListener('focusout', (e) => {
-    if (/^sub-(init|cur)-\d$/.test(e.target.id)) sync();
+    if (/^sub-cur-\d$/.test(e.target.id)) sync();
   });
 
   document.querySelectorAll('.build-btn').forEach((b) =>

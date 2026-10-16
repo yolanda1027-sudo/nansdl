@@ -1,7 +1,7 @@
 // 輸入驗證：只吃資料、吐結果，不碰畫面。
 // core 形狀：
-// { slot, rarity, stellactrum, level, main, build, subs: [{ stat, initial, current }] }
-// initial 可以是 null（沒記下來）；current 必填。
+// { slot, rarity, stellactrum, level, main, build, subs: [{ stat, hits, current }] }
+// hits＝遊戲裡副詞條旁的黃色數字（被強化幾次，含 0 級補償強化；沒有數字就是 0）
 
 const OUT_OF_RANGE = '這個數值不太可能出現，要不要再看一次？';
 
@@ -17,7 +17,7 @@ export function normalizeCore(core, rules) {
     .filter((s) => s && s.stat)
     .map((s) => ({
       stat: s.stat,
-      initial: isNum(s.initial) ? s.initial : null,
+      hits: Number.isInteger(s.hits) && s.hits > 0 ? s.hits : 0,
       current: isNum(s.current) ? s.current : null,
     }));
   return {
@@ -31,28 +31,29 @@ export function normalizeCore(core, rules) {
   };
 }
 
-// 單一副詞條數值檢查（只有 SSR 有範圍資料）
-// 回傳 { initial: 'ok'|'compensated'|'out', current: 'ok'|'out' }
+// 依強化次數推算這條副詞條「合理的數值範圍」；查不到範圍的詞條回傳 null
+export function plausibleRange(stat, hits, rules) {
+  const r = rules.substats[stat];
+  if (!r || r.initMin == null) return null;
+  return {
+    min: r.initMin + hits * r.stepMin,
+    max: Math.min(r.cap, r.initMax + hits * r.stepMax),
+  };
+}
+
+// 單一副詞條數值檢查（只有 SSR 有範圍資料）：'ok'｜'out'｜'unknown'
 export function checkSubValue(sub, rarity, rules) {
-  const r = rules.substats[sub.stat];
-  const res = { initial: 'ok', current: 'ok' };
-  if (rarity !== 'SSR' || !r) return res;
-  if (sub.initial != null) {
-    if (sub.initial < r.initMin || sub.initial > r.cap) res.initial = 'out';
-    else if (sub.initial > r.initMax) res.initial = 'compensated';
-  }
-  if (sub.current != null) {
-    if (sub.current < r.initMin || sub.current > r.cap) res.current = 'out';
-    else if (sub.initial != null && sub.current < sub.initial) res.current = 'out';
-  }
-  return res;
+  if (rarity !== 'SSR' || sub.current == null) return 'ok';
+  const range = plausibleRange(sub.stat, sub.hits, rules);
+  if (!range) return 'unknown';
+  const eps = 1e-9;
+  return sub.current < range.min - eps || sub.current > range.max + eps ? 'out' : 'ok';
 }
 
 export function validateCore(rawCore, rules) {
   const core = normalizeCore(rawCore, rules);
   const errors = [];
   const warnings = [];
-  const flags = [];
 
   const slot = rules.slots[core.slot];
   if (!slot) errors.push({ field: 'slot', msg: '先選一個槽位' });
@@ -90,16 +91,26 @@ export function validateCore(rawCore, rules) {
     if (core.main && sub.stat === core.main) {
       warnings.push({ field: 'stat', row, msg: '副詞條和主詞條一樣，要不要再看一次？' });
     }
+    if (sub.hits > rules.maxHitsPerSub) {
+      errors.push({ field: 'hits', row, msg: `強化次數最多 ${rules.maxHitsPerSub}` });
+    }
     if (sub.current == null) {
       errors.push({ field: 'current', row, msg: '要填目前數值' });
     }
-    const check = checkSubValue(sub, core.rarity, rules);
-    if (check.initial === 'out') warnings.push({ field: 'initial', row, msg: OUT_OF_RANGE });
-    if (check.initial === 'compensated') {
-      flags.push({ row, kind: 'compensated', msg: '含 0 級補償強化' });
+    if (checkSubValue(sub, core.rarity, rules) === 'out') {
+      warnings.push({ field: 'current', row, msg: OUT_OF_RANGE });
     }
-    if (check.current === 'out') warnings.push({ field: 'current', row, msg: OUT_OF_RANGE });
   });
 
-  return { ok: errors.length === 0, core, errors, warnings, flags };
+  // 強化次數加總應該≈等級推出來的次數（多出來的是 0 級補償，最多 2 次；
+  // 天生 3 條的芯核 +3 可能是新增第 4 條，所以可以少 1 次）
+  if (rarity && core.subs.length > 0) {
+    const n = Math.floor(core.level / rules.upgradeEvery);
+    const total = core.subs.reduce((a, s) => a + s.hits, 0);
+    if (total > n + 2 || total < n - 1) {
+      warnings.push({ field: 'hits', msg: `黃色數字加起來是 ${total}，+${core.level} 通常是 ${Math.max(0, n - 1)}～${n + 2}，要不要再看一次？` });
+    }
+  }
+
+  return { ok: errors.length === 0, core, errors, warnings };
 }
