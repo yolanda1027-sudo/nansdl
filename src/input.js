@@ -120,7 +120,7 @@ export function buildInputForm(root, rules) {
       <div class="field-msg" id="msg-slot" hidden></div>
     </div>
     <div class="field">
-      <div class="label" id="lbl-rar">稀有度</div>
+      <div class="label" id="lbl-rar">稀有度 <span class="opt">看芯核圖示的框色，不是星譜顏色</span></div>
       <div class="rarities" role="radiogroup" aria-labelledby="lbl-rar">${rarityBtns}</div>
       <div class="field-msg" id="msg-rarity" hidden></div>
     </div>
