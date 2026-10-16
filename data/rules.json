@@ -53,11 +53,11 @@
     "hpPct":    { "initMin": 7,   "initMax": 10,   "stepMin": 3.5,  "stepMax": 5,    "cap": 35,   "grid": 5,   "mid": 4.25 },
     "atkFlat":  { "initMin": 40,  "initMax": 60,   "stepMin": 20,   "stepMax": 30,   "cap": 210,  "grid": 30,  "mid": 25 },
     "defFlat":  { "initMin": 20,  "initMax": 30,   "stepMin": 10,   "stepMax": 15,   "cap": 105,  "grid": 15,  "mid": 12.5 },
-    "oathDmg":  { "initMin": null, "initMax": null, "stepMin": null, "stepMax": null, "cap": null, "grid": null, "_note": "誓約增傷當副詞條的數值範圍還沒查到；格數改用「2＋強化次數」推估，也不檢查數值範圍" },
+    "oathDmg":  { "initMin": 0.8, "initMax": 1.2,  "stepMin": 0.4,  "stepMax": 0.6,  "cap": 4.2,  "grid": 0.6, "_source": "7723 攻略（https://3g.7723.cn/strategy/277202.html）；遊戲截圖 ×1＝1.4% 落在範圍內" },
     "hpFlat":   { "initMin": 800, "initMax": 1200, "stepMin": 400,  "stepMax": 600,  "cap": 4200, "grid": 600 }
   },
 
-  "fallbackGrids": { "base": 2, "perHit": 1, "_doc": "查不到 1 格是多少的詞條：初始一條算 2 格，每強化一次＋1 格（規格書第 5 節的換算）" },
+  "fallbackGrids": { "base": 2, "perHit": 1, "_doc": "備用：查不到 1 格是多少的詞條（grid 填 null）時，初始一條算 2 格、每強化一次＋1 格。目前所有詞條都有範圍，沒用到" },
 
   "scoring": {
     "mainShare": 0.35,

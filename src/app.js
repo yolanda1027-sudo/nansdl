@@ -40,7 +40,7 @@ export function boot() {
   const out = document.getElementById('result');
   const empty = document.getElementById('result-empty');
 
-  let state = exampleState();
+  let state = emptyState();
   state.build = loadBuild();
   let showErrors = false;
   const filter = loadSet(FILTER_KEY);
@@ -159,7 +159,12 @@ export function boot() {
     renderResult(out, lastModel, rules, data, filter, esc);
   });
 
+  document.getElementById('btn-example').addEventListener('click', () => {
+    state = exampleState();
+    state.build = loadBuild();
+    sync();
+    run(true);
+  });
+
   sync();
-  run(false);
-  showErrors = false;
 }

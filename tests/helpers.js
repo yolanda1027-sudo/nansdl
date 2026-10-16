@@ -33,3 +33,17 @@ export const screenshotCore = () => ({
     { stat: 'weakDmg', hits: 0, current: 2.4 },
   ],
 });
+
+// 使用者第二張截圖的藍弧 α 芯核（+0，4 條副詞條，主副詞條都有生命）
+export const alphaCore = () => ({
+  slot: 'alpha',
+  rarity: 'SSR',
+  level: 0,
+  build: 'crit',
+  subs: [
+    { stat: 'hpFlat', hits: 0, current: 839 },
+    { stat: 'atkFlat', hits: 0, current: 56 },
+    { stat: 'weakDmg', hits: 0, current: 2.6 },
+    { stat: 'atkPct', hits: 0, current: 9.2 },
+  ],
+});

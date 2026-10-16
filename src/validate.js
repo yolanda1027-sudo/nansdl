@@ -88,10 +88,7 @@ export function validateCore(rawCore, rules) {
     }
     if (seen.has(sub.stat)) errors.push({ field: 'subs', row, msg: '副詞條不能重複' });
     seen.add(sub.stat);
-    // 規格書說不能重複，但範例芯核（主詞條暴擊＋副詞條暴擊）本身就重複，先只提醒不擋
-    if (core.main && sub.stat === core.main) {
-      warnings.push({ field: 'stat', row, msg: '副詞條和主詞條一樣，要不要再看一次？' });
-    }
+    // 主詞條和副詞條本來就可以一樣（例如 α 主詞條生命＋副詞條生命），不檢查
     if (sub.hits > rules.maxHitsPerSub) {
       errors.push({ field: 'hits', row, msg: `強化次數最多 ${rules.maxHitsPerSub}` });
     }

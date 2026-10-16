@@ -8,10 +8,11 @@ import { analyzeGrowth } from '../src/growth.js';
 
 const core = () => validateCore(exampleCore(), rules).core;
 
-test('範例：通過驗證（主副詞條重複只提醒）', () => {
+test('範例：通過驗證（主副詞條一樣是正常的）', () => {
   const v = validateCore(exampleCore(), rules);
   assert.equal(v.ok, true);
   assert.equal(v.errors.length, 0);
+  assert.equal(v.warnings.length, 0);
 });
 
 test('範例：攻擊型 87、防禦型 82、生命型 86', () => {

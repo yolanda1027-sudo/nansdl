@@ -149,7 +149,9 @@ select:disabled, input:disabled { background: var(--muted-soft); color: var(--mu
 .why td small { font-size: 11px; color: var(--warn); margin-left: 4px; font-family: var(--font-body); }
 
 /* 結果 */
-.result-empty { text-align: center; color: var(--ink-soft); font-size: 14px; padding: 26px 12px; border: 2px dashed var(--line); border-radius: var(--radius-lg); }
+.result-empty { text-align: center; color: var(--ink-soft); font-size: 14px; padding: 22px 12px; border: 2px dashed var(--line); border-radius: var(--radius-lg); display: grid; gap: 10px; justify-items: center; }
+.result-empty p { margin: 0; }
+.link-btn { border: 0; background: var(--surface-2); color: var(--pink-strong); font-weight: 700; font-size: 14px; border-radius: 999px; padding: 8px 16px; }
 #result { display: grid; gap: 16px; scroll-margin-top: 12px; }
 
 .verdict { border-radius: var(--radius-lg); padding: 20px; display: grid; gap: 12px; background: var(--surface); box-shadow: var(--shadow); border: 3px solid var(--line); }
@@ -262,7 +264,10 @@ select:disabled, input:disabled { background: var(--muted-soft); color: var(--mu
   <section class="card form" id="form" aria-label="輸入芯核"></section>
   <div class="form-errors" id="form-errors" role="alert" hidden></div>
 
-  <div class="result-empty" id="result-empty" hidden>填好芯核後按「檢查」，結論和 27 個搭檔的分數會出現在這裡。</div>
+  <div class="result-empty" id="result-empty">
+    <p>填好芯核後按「檢查」，結論和 27 個搭檔的分數會出現在這裡。</p>
+    <button type="button" class="link-btn" id="btn-example">先看範例芯核的結果</button>
+  </div>
   <div id="result" aria-live="polite"></div>
 
   <footer class="foot">

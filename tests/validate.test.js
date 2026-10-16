@@ -33,19 +33,21 @@ test('validateCore：副詞條重複、沒填目前數值會報錯', () => {
   assert.ok(v.errors.some((e) => e.field === 'current' && e.row === 2));
 });
 
-test('plausibleRange：依強化次數算範圍；誓約增傷查不到回 null', () => {
+test('plausibleRange：依強化次數算範圍（含誓約增傷）', () => {
   assert.deepEqual(plausibleRange('critRate', 0, rules), { min: 1.1, max: 1.6 });
   assert.deepEqual(plausibleRange('critRate', 2, rules), { min: 2.2, max: 3.2 });
   assert.equal(plausibleRange('critRate', 5, rules).max, 5.6);
   assert.ok(Math.abs(plausibleRange('critRate', 7, rules).max - 7.2) < 1e-9);
-  assert.equal(plausibleRange('oathDmg', 1, rules), null);
+  const oath = plausibleRange('oathDmg', 1, rules);
+  assert.ok(Math.abs(oath.min - 1.2) < 1e-9 && Math.abs(oath.max - 1.8) < 1e-9);
 });
 
 test('checkSubValue：0 級暴擊 2.4% 不合理，但帶 1 次強化就合理', () => {
   assert.equal(checkSubValue({ stat: 'critRate', hits: 0, current: 2.4 }, 'SSR', rules), 'out');
   assert.equal(checkSubValue({ stat: 'critRate', hits: 1, current: 2.4 }, 'SSR', rules), 'ok');
   assert.equal(checkSubValue({ stat: 'critRate', hits: 0, current: 9 }, 'SR', rules), 'ok');
-  assert.equal(checkSubValue({ stat: 'oathDmg', hits: 1, current: 1.4 }, 'SSR', rules), 'unknown');
+  assert.equal(checkSubValue({ stat: 'oathDmg', hits: 1, current: 1.4 }, 'SSR', rules), 'ok');
+  assert.equal(checkSubValue({ stat: 'oathDmg', hits: 0, current: 1.4 }, 'SSR', rules), 'out');
 });
 
 test('checkSubValue：強化 7 次的暴擊 6.5% 不會被誤判', () => {
@@ -61,4 +63,11 @@ test('validateCore：截圖芯核可以通過，誓約增傷是合法副詞條',
 test('validateCore：黃色數字加總和等級對不上會提醒', () => {
   const v = validateCore({ slot: 'alpha', rarity: 'SSR', level: 3, subs: [{ stat: 'critRate', hits: 5, current: 4.5 }] }, rules);
   assert.ok(v.warnings.some((w) => w.field === 'hits' && w.row == null));
+});
+
+test('validateCore：α 主詞條生命＋副詞條生命不會被提醒（第二張截圖）', async () => {
+  const { alphaCore } = await import('./helpers.js');
+  const v = validateCore(alphaCore(), rules);
+  assert.equal(v.ok, true);
+  assert.equal(v.warnings.length, 0);
 });

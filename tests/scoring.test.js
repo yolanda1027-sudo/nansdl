@@ -64,9 +64,18 @@ test('overallVerdict：分數門檻與長歪降級', () => {
   assert.equal(overallVerdict(base({ rarity: 'R' }), null, 'great', rules).text, '拆');
 });
 
-test('gridsOf：誓約增傷查不到 1 格，用 2＋強化次數推估', () => {
-  assert.equal(gridsOf({ stat: 'oathDmg', hits: 1, current: 1.4 }, rules), 3);
-  assert.equal(gridsOf({ stat: 'oathDmg', hits: 0, current: 0.9 }, rules), 2);
+test('gridsOf：誓約增傷 1 格＝0.6%；查不到範圍的詞條用 2＋強化次數推估', () => {
+  assert.equal(gridsOf({ stat: 'oathDmg', hits: 0, current: 1.2 }, rules), 2);
+  const noGrid = structuredClone(rules);
+  noGrid.substats.oathDmg.grid = null;
+  assert.equal(gridsOf({ stat: 'oathDmg', hits: 1, current: 1.4 }, noGrid), 3);
+});
+
+test('scoreForType：藍弧 α 芯核攻擊型 48、防禦型 33、生命型 40', async () => {
+  const { alphaCore } = await import('./helpers.js');
+  assert.equal(scoreForType(alphaCore(), 'atk', rules).score, 48);
+  assert.equal(scoreForType(alphaCore(), 'def', rules).score, 33);
+  assert.equal(scoreForType(alphaCore(), 'hp', rules).score, 40);
 });
 
 test('scoreForType：截圖芯核（β 防禦加成）防禦型 57、攻擊型 40', async () => {
