@@ -44,7 +44,7 @@
   "subOptions": ["critRate", "critDmg", "weakDmg", "oathDmg", "atkPct", "defPct", "hpPct", "atkFlat", "defFlat", "hpFlat"],
 
   "substats": {
-    "_doc": "SSR 副詞條。initMin/initMax＝初始值範圍；stepMin/stepMax＝每次強化範圍；cap＝理論上限；grid＝評分用的 1 格（單次強化最大值）。強化次數直接用遊戲裡詞條旁的黃色數字，不再從數值反推",
+    "_doc": "SSR 副詞條。initMin/initMax＝初始值範圍；stepMin/stepMax＝每次強化範圍；cap＝規格書的理論上限（以強化 5 次計，只供參考；天生 2 條的芯核單條最多可到 7 次，會超過）；grid＝評分用的 1 格（單次強化最大值）。強化次數直接用遊戲裡詞條旁的黃色數字，不再從數值反推",
     "critRate": { "initMin": 1.1, "initMax": 1.6,  "stepMin": 0.55, "stepMax": 0.8,  "cap": 5.6,  "grid": 0.8 },
     "critDmg":  { "initMin": 2.2, "initMax": 3.2,  "stepMin": 1.1,  "stepMax": 1.6,  "cap": 11.2, "grid": 1.6 },
     "weakDmg":  { "initMin": 1.8, "initMax": 2.6,  "stepMin": 0.9,  "stepMax": 1.3,  "cap": 9.1,  "grid": 1.3 },

@@ -35,9 +35,10 @@ export function normalizeCore(core, rules) {
 export function plausibleRange(stat, hits, rules) {
   const r = rules.substats[stat];
   if (!r || r.initMin == null) return null;
+  // 不套 cap：cap 是用最多強化 5 次算的，天生 2 條的芯核單條可以被強化到 7 次
   return {
     min: r.initMin + hits * r.stepMin,
-    max: Math.min(r.cap, r.initMax + hits * r.stepMax),
+    max: r.initMax + hits * r.stepMax,
   };
 }
 

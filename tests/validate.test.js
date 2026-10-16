@@ -37,6 +37,7 @@ test('plausibleRange：依強化次數算範圍；誓約增傷查不到回 null'
   assert.deepEqual(plausibleRange('critRate', 0, rules), { min: 1.1, max: 1.6 });
   assert.deepEqual(plausibleRange('critRate', 2, rules), { min: 2.2, max: 3.2 });
   assert.equal(plausibleRange('critRate', 5, rules).max, 5.6);
+  assert.ok(Math.abs(plausibleRange('critRate', 7, rules).max - 7.2) < 1e-9);
   assert.equal(plausibleRange('oathDmg', 1, rules), null);
 });
 
@@ -45,6 +46,10 @@ test('checkSubValue：0 級暴擊 2.4% 不合理，但帶 1 次強化就合理',
   assert.equal(checkSubValue({ stat: 'critRate', hits: 1, current: 2.4 }, 'SSR', rules), 'ok');
   assert.equal(checkSubValue({ stat: 'critRate', hits: 0, current: 9 }, 'SR', rules), 'ok');
   assert.equal(checkSubValue({ stat: 'oathDmg', hits: 1, current: 1.4 }, 'SSR', rules), 'unknown');
+});
+
+test('checkSubValue：強化 7 次的暴擊 6.5% 不會被誤判', () => {
+  assert.equal(checkSubValue({ stat: 'critRate', hits: 7, current: 6.5 }, 'SSR', rules), 'ok');
 });
 
 test('validateCore：截圖芯核可以通過，誓約增傷是合法副詞條', () => {
